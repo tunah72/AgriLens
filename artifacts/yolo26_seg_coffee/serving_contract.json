@@ -1,0 +1,24 @@
+{
+  "input": {
+    "name": "images",
+    "shape": [
+      1,
+      3,
+      1024,
+      1024
+    ],
+    "preprocess": "letterbox to square, pad 114, RGB, /255"
+  },
+  "classes": [
+    "LeafMiner",
+    "PowderyMildew",
+    "Rust",
+    "AlgalLeafSpot"
+  ],
+  "conf": 0.55,
+  "iou_nms": 0.7,
+  "postprocess": "decode seg protos, NMS, then unletterbox to original resolution",
+  "image_level_labels": [
+    "Healthy"
+  ]
+}

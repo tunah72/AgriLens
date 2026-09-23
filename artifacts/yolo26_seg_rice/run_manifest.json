@@ -1,0 +1,245 @@
+{
+  "run_id": "20260922T182638Z",
+  "created_utc": "2026-09-22T21:16:22.747378+00:00",
+  "domain": "rice",
+  "classes": [
+    "BrownSpot",
+    "Hispa",
+    "LeafBlast"
+  ],
+  "dataset": {
+    "version": "coffee_rice_v002",
+    "root": "/kaggle/input/datasets/tunah72/cleaned-coffee-and-rice-leaf-disease-v002/coffee_rice_v002",
+    "images_version": "coffee_rice_v001",
+    "repair_config": {
+      "dataset_version": "coffee_rice_v002",
+      "source_version": "coffee_rice_v001",
+      "images_source_version": "coffee_rice_v001",
+      "images_copied": true,
+      "images_link_mode": "auto",
+      "random_seed": 42,
+      "split_ratio": {
+        "train": 0.7,
+        "val": 0.15,
+        "test": 0.15
+      },
+      "split_strategy": {
+        "rice": "grouped_by_capture_burst_and_verified_duplicates",
+        "coffee": "grouped_by_source_photo_id_one_canonical_variant"
+      },
+      "instance_policy": {
+        "one_instance_per_annotation": true,
+        "ring_selection": "largest_ring",
+        "min_ring_points": 3,
+        "min_area_frac": 0.0005,
+        "max_area_frac": 0.9
+      },
+      "class_policy": {
+        "image_level_labels": [
+          "Healthy"
+        ],
+        "detection_classes": {
+          "rice": [
+            "BrownSpot",
+            "Hispa",
+            "LeafBlast"
+          ],
+          "coffee": [
+            "LeafMiner",
+            "PowderyMildew",
+            "Rust",
+            "AlgalLeafSpot"
+          ]
+        },
+        "image_level_images_become_negatives": true
+      },
+      "duplicate_detection": {
+        "enabled": true,
+        "phash_bits": 1024,
+        "phash_candidate_hamming": 60,
+        "pixel_tolerance": 6.0,
+        "flip_rot_invariant": true
+      },
+      "burst_gap_seconds": 10.0
+    },
+    "exported_counts": {
+      "size": {
+        "test": 461,
+        "train": 1308,
+        "val": 459
+      },
+      "sum": {
+        "test": 318,
+        "train": 1268,
+        "val": 265
+      }
+    },
+    "negative_train_ratio": 0.15
+  },
+  "model": {
+    "weights_init": "yolo26n-seg.pt",
+    "task": "instance_segmentation"
+  },
+  "train_args": {
+    "model": "yolo26n-seg.pt",
+    "imgsz": 1024,
+    "epochs": 120,
+    "batch": 8,
+    "patience": 30,
+    "optimizer": "AdamW",
+    "lr0": 0.001,
+    "lrf": 0.01,
+    "cos_lr": true,
+    "warmup_epochs": 5.0,
+    "weight_decay": 0.0005,
+    "box": 7.5,
+    "cls": 0.6,
+    "dfl": 1.5,
+    "mosaic": 0.8,
+    "close_mosaic": 25,
+    "copy_paste": 0.15,
+    "mixup": 0.0,
+    "scale": 0.3,
+    "degrees": 10.0,
+    "translate": 0.1,
+    "shear": 0.0,
+    "perspective": 0.0,
+    "fliplr": 0.5,
+    "flipud": 0.1,
+    "hsv_h": 0.015,
+    "hsv_s": 0.7,
+    "hsv_v": 0.4,
+    "erasing": 0.0,
+    "overlap_mask": true,
+    "mask_ratio": 4,
+    "workers": 2,
+    "seed": 42,
+    "deterministic": true,
+    "plots": true,
+    "val": true,
+    "save": true
+  },
+  "training": {
+    "executed": true,
+    "run_dir": "/kaggle/working/runs/yolo26_seg/yolo26n_seg_rice_20260922T182638Z",
+    "best_checkpoint": "/kaggle/working/runs/yolo26_seg/yolo26n_seg_rice_20260922T182638Z/weights/best.pt",
+    "wall_time_seconds": 9836.5,
+    "epochs_requested": 120,
+    "epochs_completed": 120
+  },
+  "operating_point": {
+    "conf": 0.6,
+    "iou_nms": 0.7,
+    "selected_on": "val_mask_f1"
+  },
+  "metrics": {
+    "ultralytics_val": {
+      "mask_mAP50": 0.5499096575970102,
+      "mask_mAP50_95": 0.5175686155851332,
+      "mask_precision": 0.532784253888611,
+      "mask_recall": 0.6037745026509072,
+      "box_mAP50": 0.552607480599769,
+      "box_mAP50_95": 0.5154905879475984,
+      "box_precision": 0.532784253888611,
+      "box_recall": 0.6037745026509072,
+      "fitness": 1.0330592035327317,
+      "per_class": {
+        "BrownSpot": {
+          "mask_AP50": 0.6091367241939728,
+          "mask_AP50_95": 0.5399901432983233,
+          "box_AP50": 0.6106105156897668
+        },
+        "Hispa": {
+          "mask_AP50": 0.2529533942325399,
+          "mask_AP50_95": 0.2464104082887201,
+          "box_AP50": 0.25957307174502264
+        },
+        "LeafBlast": {
+          "mask_AP50": 0.787638854364518,
+          "mask_AP50_95": 0.7663052951683561,
+          "box_AP50": 0.787638854364518
+        }
+      }
+    },
+    "ultralytics_test": {
+      "mask_mAP50": 0.5025290191443599,
+      "mask_mAP50_95": 0.4724159773913229,
+      "mask_precision": 0.5290671825874956,
+      "mask_recall": 0.5360579528354358,
+      "box_mAP50": 0.5049029192352935,
+      "box_mAP50_95": 0.4732497260273954,
+      "box_precision": 0.5290671825874956,
+      "box_recall": 0.5360579528354358,
+      "fitness": 0.9456657034187184,
+      "per_class": {
+        "BrownSpot": {
+          "mask_AP50": 0.570540592420582,
+          "mask_AP50_95": 0.5103042408398037,
+          "box_AP50": 0.5669091468948424
+        },
+        "Hispa": {
+          "mask_AP50": 0.29203387716190005,
+          "mask_AP50_95": 0.2906505618809633,
+          "box_AP50": 0.2979202118973596
+        },
+        "LeafBlast": {
+          "mask_AP50": 0.6450125878505977,
+          "mask_AP50_95": 0.6162931294532016,
+          "box_AP50": 0.6498793989136785
+        }
+      }
+    },
+    "coco_test_original_resolution": {
+      "conf": 0.6,
+      "n_images": 461,
+      "n_detections": 281,
+      "latency_ms_mean": 81.58,
+      "latency_ms_p95": 148.24,
+      "device": "0",
+      "mask_mAP50_95": 0.3516,
+      "mask_mAP50": 0.3587,
+      "mask_mAP75": 0.3587,
+      "mask_AR100": 0.4646,
+      "mask_AP50_per_class": {
+        "BrownSpot": 0.4215,
+        "Hispa": 0.1731,
+        "LeafBlast": 0.4816
+      },
+      "box_mAP50_95": 0.3576,
+      "box_mAP50": 0.3587,
+      "box_mAP75": 0.3587,
+      "box_AR100": 0.468,
+      "box_AP50_per_class": {
+        "BrownSpot": 0.4215,
+        "Hispa": 0.1731,
+        "LeafBlast": 0.4816
+      }
+    },
+    "semantic_test": {
+      "conf": 0.6,
+      "mIoU": 0.4574,
+      "Dice": 0.6146,
+      "per_class_IoU": {
+        "BrownSpot": 0.6061,
+        "Hispa": 0.2713,
+        "LeafBlast": 0.4948
+      },
+      "background_images": 208,
+      "background_clean_rate": 0.5048
+    },
+    "latency": {
+      "n_images": 30,
+      "imgsz": 1024,
+      "cpu_ms_mean": 270.64,
+      "cpu_ms_p95": 330.67
+    }
+  },
+  "environment": {
+    "python": "3.12.13",
+    "platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+    "torch": "2.10.0+cu128",
+    "cuda": "12.8",
+    "gpu": "Tesla T4",
+    "ultralytics": "8.4.159"
+  }
+}

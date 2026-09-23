@@ -1,0 +1,302 @@
+{
+  "run_id": "20260922T115556Z",
+  "created_utc": "2026-09-22T16:37:26.514757+00:00",
+  "domain": "joint",
+  "classes": [
+    "LeafMiner",
+    "PowderyMildew",
+    "Rust",
+    "AlgalLeafSpot",
+    "BrownSpot",
+    "Hispa",
+    "LeafBlast"
+  ],
+  "dataset": {
+    "version": "coffee_rice_v002",
+    "root": "/kaggle/input/datasets/tunah72/cleaned-coffee-and-rice-leaf-disease-v002/coffee_rice_v002",
+    "images_version": "coffee_rice_v001",
+    "repair_config": {
+      "dataset_version": "coffee_rice_v002",
+      "source_version": "coffee_rice_v001",
+      "images_source_version": "coffee_rice_v001",
+      "images_copied": true,
+      "images_link_mode": "auto",
+      "random_seed": 42,
+      "split_ratio": {
+        "train": 0.7,
+        "val": 0.15,
+        "test": 0.15
+      },
+      "split_strategy": {
+        "rice": "grouped_by_capture_burst_and_verified_duplicates",
+        "coffee": "grouped_by_source_photo_id_one_canonical_variant"
+      },
+      "instance_policy": {
+        "one_instance_per_annotation": true,
+        "ring_selection": "largest_ring",
+        "min_ring_points": 3,
+        "min_area_frac": 0.0005,
+        "max_area_frac": 0.9
+      },
+      "class_policy": {
+        "image_level_labels": [
+          "Healthy"
+        ],
+        "detection_classes": {
+          "rice": [
+            "BrownSpot",
+            "Hispa",
+            "LeafBlast"
+          ],
+          "coffee": [
+            "LeafMiner",
+            "PowderyMildew",
+            "Rust",
+            "AlgalLeafSpot"
+          ]
+        },
+        "image_level_images_become_negatives": true
+      },
+      "duplicate_detection": {
+        "enabled": true,
+        "phash_bits": 1024,
+        "phash_candidate_hamming": 60,
+        "pixel_tolerance": 6.0,
+        "flip_rot_invariant": true
+      },
+      "burst_gap_seconds": 10.0
+    },
+    "exported_counts": {
+      "size": {
+        "test": 648,
+        "train": 2342,
+        "val": 649
+      },
+      "sum": {
+        "test": 505,
+        "train": 2147,
+        "val": 455
+      }
+    },
+    "negative_train_ratio": 0.15
+  },
+  "model": {
+    "weights_init": "yolo26n-seg.pt",
+    "task": "instance_segmentation"
+  },
+  "train_args": {
+    "model": "yolo26n-seg.pt",
+    "imgsz": 1024,
+    "epochs": 120,
+    "batch": 8,
+    "patience": 30,
+    "optimizer": "AdamW",
+    "lr0": 0.001,
+    "lrf": 0.01,
+    "cos_lr": true,
+    "warmup_epochs": 5.0,
+    "weight_decay": 0.0005,
+    "box": 7.5,
+    "cls": 0.55,
+    "dfl": 1.5,
+    "mosaic": 0.9,
+    "close_mosaic": 20,
+    "copy_paste": 0.2,
+    "mixup": 0.0,
+    "scale": 0.5,
+    "degrees": 15.0,
+    "translate": 0.1,
+    "shear": 0.0,
+    "perspective": 0.0,
+    "fliplr": 0.5,
+    "flipud": 0.2,
+    "hsv_h": 0.015,
+    "hsv_s": 0.7,
+    "hsv_v": 0.4,
+    "erasing": 0.0,
+    "overlap_mask": true,
+    "mask_ratio": 4,
+    "workers": 2,
+    "seed": 42,
+    "deterministic": true,
+    "plots": true,
+    "val": true,
+    "save": true
+  },
+  "training": {
+    "executed": true,
+    "run_dir": "/kaggle/working/runs/yolo26_seg/yolo26n_seg_joint_20260922T115556Z",
+    "best_checkpoint": "/kaggle/working/runs/yolo26_seg/yolo26n_seg_joint_20260922T115556Z/weights/best.pt",
+    "wall_time_seconds": 16350.4,
+    "epochs_requested": 120,
+    "epochs_completed": 120
+  },
+  "operating_point": {
+    "conf": 0.5,
+    "iou_nms": 0.7,
+    "selected_on": "val_mask_f1"
+  },
+  "metrics": {
+    "ultralytics_val": {
+      "mask_mAP50": 0.8177222335868757,
+      "mask_mAP50_95": 0.7980237968218856,
+      "mask_precision": 0.8322822650232684,
+      "mask_recall": 0.7689268971598109,
+      "box_mAP50": 0.818955190467051,
+      "box_mAP50_95": 0.7620999015200544,
+      "box_precision": 0.8322822650232684,
+      "box_recall": 0.7689268971598109,
+      "fitness": 1.56012369834194,
+      "per_class": {
+        "LeafMiner": {
+          "mask_AP50": 0.8674004066199716,
+          "mask_AP50_95": 0.8187446687950224,
+          "box_AP50": 0.8670903888965246
+        },
+        "PowderyMildew": {
+          "mask_AP50": 0.9723755656108598,
+          "mask_AP50_95": 0.9723755656108597,
+          "box_AP50": 0.9723755656108598
+        },
+        "Rust": {
+          "mask_AP50": 0.8859157728274498,
+          "mask_AP50_95": 0.8806534500016902,
+          "box_AP50": 0.8858660819397104
+        },
+        "AlgalLeafSpot": {
+          "mask_AP50": 0.9784605694627433,
+          "mask_AP50_95": 0.9784605694627434,
+          "box_AP50": 0.9784605694627433
+        },
+        "BrownSpot": {
+          "mask_AP50": 0.7063987967359817,
+          "mask_AP50_95": 0.6569270641777378,
+          "box_AP50": 0.7049672027728309
+        },
+        "Hispa": {
+          "mask_AP50": 0.5343045593612546,
+          "mask_AP50_95": 0.5252531172670716,
+          "box_AP50": 0.5426843798271523
+        },
+        "LeafBlast": {
+          "mask_AP50": 0.7791999644898688,
+          "mask_AP50_95": 0.7537521424380744,
+          "box_AP50": 0.7812421447595359
+        }
+      }
+    },
+    "ultralytics_test": {
+      "mask_mAP50": 0.7752717933653547,
+      "mask_mAP50_95": 0.7560892693237743,
+      "mask_precision": 0.8222052670180757,
+      "mask_recall": 0.7256112796777145,
+      "box_mAP50": 0.7794017487361565,
+      "box_mAP50_95": 0.7305150740874945,
+      "box_precision": 0.8222052670180757,
+      "box_recall": 0.7256112796777145,
+      "fitness": 1.4866043434112688,
+      "per_class": {
+        "LeafMiner": {
+          "mask_AP50": 0.757024089841163,
+          "mask_AP50_95": 0.7387535593747112,
+          "box_AP50": 0.7667696003183808
+        },
+        "PowderyMildew": {
+          "mask_AP50": 0.925,
+          "mask_AP50_95": 0.9250000000000002,
+          "box_AP50": 0.925
+        },
+        "Rust": {
+          "mask_AP50": 0.898930687345344,
+          "mask_AP50_95": 0.881299645899178,
+          "box_AP50": 0.898930687345344
+        },
+        "AlgalLeafSpot": {
+          "mask_AP50": 0.962321386208728,
+          "mask_AP50_95": 0.9605102664424183,
+          "box_AP50": 0.962321386208728
+        },
+        "BrownSpot": {
+          "mask_AP50": 0.6219483087914188,
+          "mask_AP50_95": 0.5721860226761599,
+          "box_AP50": 0.6259742554779711
+        },
+        "Hispa": {
+          "mask_AP50": 0.5713640489283955,
+          "mask_AP50_95": 0.5565843645082529,
+          "box_AP50": 0.5822892893535425
+        },
+        "LeafBlast": {
+          "mask_AP50": 0.6903140324424331,
+          "mask_AP50_95": 0.6582910263657007,
+          "box_AP50": 0.6945270224491296
+        }
+      }
+    },
+    "coco_test_original_resolution": {
+      "conf": 0.5,
+      "n_images": 648,
+      "n_detections": 391,
+      "domain": "all",
+      "latency_ms_mean": 68.29,
+      "latency_ms_p95": 137.63,
+      "device": "0",
+      "mask_mAP50_95": 0.6106,
+      "mask_mAP50": 0.6169,
+      "mask_mAP75": 0.6169,
+      "mask_AR100": 0.6455,
+      "mask_AP50_per_class": {
+        "LeafMiner": 0.5855,
+        "PowderyMildew": 0.7624,
+        "Rust": 0.7799,
+        "AlgalLeafSpot": 0.7497,
+        "BrownSpot": 0.4618,
+        "Hispa": 0.4388,
+        "LeafBlast": 0.5402
+      },
+      "box_mAP50_95": 0.6011,
+      "box_mAP50": 0.6169,
+      "box_mAP75": 0.6169,
+      "box_AR100": 0.6394,
+      "box_AP50_per_class": {
+        "LeafMiner": 0.5855,
+        "PowderyMildew": 0.7624,
+        "Rust": 0.7799,
+        "AlgalLeafSpot": 0.7497,
+        "BrownSpot": 0.4618,
+        "Hispa": 0.4388,
+        "LeafBlast": 0.5402
+      }
+    },
+    "semantic_test": {
+      "conf": 0.5,
+      "mIoU": 0.6986,
+      "Dice": 0.8155,
+      "per_class_IoU": {
+        "LeafMiner": 0.7129,
+        "PowderyMildew": 0.8344,
+        "Rust": 0.8423,
+        "AlgalLeafSpot": 0.808,
+        "BrownSpot": 0.6506,
+        "Hispa": 0.5299,
+        "LeafBlast": 0.5123
+      },
+      "background_images": 208,
+      "background_clean_rate": 0.8029
+    },
+    "latency": {
+      "n_images": 30,
+      "imgsz": 1024,
+      "cpu_ms_mean": 205.35,
+      "cpu_ms_p95": 223.16
+    }
+  },
+  "environment": {
+    "python": "3.12.13",
+    "platform": "Linux-6.12.90+-x86_64-with-glibc2.35",
+    "torch": "2.10.0+cu128",
+    "cuda": "12.8",
+    "gpu": "Tesla T4",
+    "ultralytics": "8.4.159"
+  }
+}

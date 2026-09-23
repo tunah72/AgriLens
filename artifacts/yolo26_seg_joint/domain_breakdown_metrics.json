@@ -1,0 +1,58 @@
+{
+  "coffee": {
+    "conf": 0.5,
+    "n_images": 187,
+    "n_detections": 152,
+    "domain": "coffee",
+    "latency_ms_mean": 29.5,
+    "latency_ms_p95": 32.22,
+    "device": "0",
+    "mask_mAP50_95": 0.7151,
+    "mask_mAP50": 0.7194,
+    "mask_mAP75": 0.7194,
+    "mask_AR100": 0.7437,
+    "mask_AP50_per_class": {
+      "LeafMiner": 0.5855,
+      "PowderyMildew": 0.7624,
+      "Rust": 0.7799,
+      "AlgalLeafSpot": 0.7497
+    },
+    "box_mAP50_95": 0.6946,
+    "box_mAP50": 0.7194,
+    "box_mAP75": 0.7194,
+    "box_AR100": 0.7298,
+    "box_AP50_per_class": {
+      "LeafMiner": 0.5855,
+      "PowderyMildew": 0.7624,
+      "Rust": 0.7799,
+      "AlgalLeafSpot": 0.7497
+    }
+  },
+  "rice": {
+    "conf": 0.5,
+    "n_images": 461,
+    "n_detections": 239,
+    "domain": "rice",
+    "latency_ms_mean": 82.25,
+    "latency_ms_p95": 144.51,
+    "device": "0",
+    "mask_mAP50_95": 0.4712,
+    "mask_mAP50": 0.4803,
+    "mask_mAP75": 0.4803,
+    "mask_AR100": 0.5146,
+    "mask_AP50_per_class": {
+      "BrownSpot": 0.4618,
+      "Hispa": 0.4388,
+      "LeafBlast": 0.5402
+    },
+    "box_mAP50_95": 0.4764,
+    "box_mAP50": 0.4803,
+    "box_mAP75": 0.4803,
+    "box_AR100": 0.5187,
+    "box_AP50_per_class": {
+      "BrownSpot": 0.4618,
+      "Hispa": 0.4388,
+      "LeafBlast": 0.5402
+    }
+  }
+}

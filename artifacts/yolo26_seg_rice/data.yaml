@@ -1,0 +1,9 @@
+path: /kaggle/working/yolo_dataset/rice_coffee_rice_v002
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: BrownSpot
+  1: Hispa
+  2: LeafBlast
+nc: 3

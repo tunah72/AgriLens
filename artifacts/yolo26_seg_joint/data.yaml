@@ -1,0 +1,13 @@
+path: /kaggle/working/yolo_dataset/joint_coffee_rice_v002
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: LeafMiner
+  1: PowderyMildew
+  2: Rust
+  3: AlgalLeafSpot
+  4: BrownSpot
+  5: Hispa
+  6: LeafBlast
+nc: 7

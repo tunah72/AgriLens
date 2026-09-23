@@ -1,0 +1,2 @@
+run_id,domain,conf,mask_mAP50_coco,mask_mAP50_95_coco,box_mAP50_coco,box_mAP50_95_coco,mask_mAP50_ultralytics,mIoU,Dice,background_clean_rate,cpu_ms_mean,checkpoint_mb
+20260922T115556Z,joint,0.5,0.6169,0.6106,0.6169,0.6011,0.7752717933653547,0.6986,0.8155,0.8029,205.35,6.61

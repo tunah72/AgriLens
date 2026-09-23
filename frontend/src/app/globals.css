@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --color-background: #ffffff;
+    --color-foreground: #09090b; /* zinc-950 */
+    --color-surface: #f4f4f5; /* zinc-100 */
+    --color-surface-sidebar: #f8f8f8;
+    --color-surface-raised: #ffffff;
+    --color-surface-border: #e4e4e7; /* zinc-200 */
+    
+    --color-claude-text: #27272a; /* zinc-800 */
+    --color-claude-muted: #71717a; /* zinc-500 */
+    --color-claude-orange: #09090b; /* zinc-950 (black) */
+    --color-claude-orange-hover: #27272a; /* zinc-800 */
+    --color-claude-orange-text: #ffffff; /* white */
+
+    /* Interactive state tokens */
+    --color-interactive-hover: #f4f4f5; /* zinc-100 */
+    --color-interactive-active: #e4e4e7; /* zinc-200 */
+    --color-text-secondary: #71717a; /* zinc-500 */
+    --color-text-tertiary: #71717a; /* zinc-500: AA contrast on white */
+    --color-surface-hover: #fafafa; /* zinc-50 */
+    --color-border-hover: #d4d4d8; /* zinc-300 */
+    --color-input-bg: #ffffff; /* input background */
+    --color-input-disabled: #fafaf9; /* disabled input bg */
+  }
+
+  :root.dark, .dark {
+    color-scheme: dark;
+    --color-background: #09090b; /* zinc-950 */
+    --color-foreground: #fafafa; /* zinc-50 */
+    --color-surface: #18181b; /* zinc-900 */
+    --color-surface-sidebar: #09090b;
+    --color-surface-raised: #27272a; /* zinc-800 */
+    --color-surface-border: #3f3f46; /* zinc-700 */
+    
+    --color-claude-text: #f4f4f5; /* zinc-100 */
+    --color-claude-muted: #a1a1aa; /* zinc-400 */
+    --color-claude-orange: #ffffff; /* white */
+    --color-claude-orange-hover: #e4e4e7; /* zinc-200 */
+    --color-claude-orange-text: #09090b; /* black */
+
+    /* Interactive state tokens — dark */
+    --color-interactive-hover: #27272a; /* zinc-800 */
+    --color-interactive-active: #2c2c30; /* slightly lighter than surface */
+    --color-text-secondary: #a1a1aa; /* zinc-400 */
+    --color-text-tertiary: #71717a; /* zinc-500 */
+    --color-surface-hover: #1c1c1f; /* subtle hover surface */
+    --color-border-hover: #52525b; /* zinc-600 */
+    --color-input-bg: #18181b; /* zinc-900 */
+    --color-input-disabled: #1c1c1f; /* slightly lighter */
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/60 dark:bg-zinc-900/60 backdrop-blur-md border border-zinc-200/50 dark:border-zinc-700/50 shadow-sm;
+  }
+  
+  .premium-shadow {
+    @apply shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.1)];
+  }
+}

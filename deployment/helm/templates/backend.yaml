@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "plant-disease.fullname" . }}-backend
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "plant-disease.fullname" . }}
+    app.kubernetes.io/component: backend
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "plant-disease.fullname" . }}
+      app.kubernetes.io/component: backend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "plant-disease.fullname" . }}
+        app.kubernetes.io/component: backend
+    spec:
+      {{- if .Values.images.pullSecretName }}
+      imagePullSecrets:
+        - name: {{ .Values.images.pullSecretName }}
+      {{- end }}
+      initContainers:
+        - name: wait-for-deps
+          image: alpine:3.18
+          command: ['sh', '-c', 'until nc -z postgres 5432; do echo waiting for postgres; sleep 2; done']
+        {{- if .Values.model.persistence.enabled }}
+        - name: download-model
+          image: alpine:3.18
+          env:
+            - name: RICE_MODEL_URL
+              value: {{ .Values.model.riceDownloadUrl | quote }}
+            - name: COFFEE_MODEL_URL
+              value: {{ .Values.model.coffeeDownloadUrl | quote }}
+            - name: CLASS_NAMES_URL
+              value: {{ .Values.model.classNamesDownloadUrl | quote }}
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              download_if_missing() {
+                local dest="$1" url="$2" label="$3"
+                if [ -f "$dest" ]; then
+                  echo "$label already exists. Skipping."
+                elif [ -n "$url" ]; then
+                  echo "Downloading $label from $url ..."
+                  wget -q -O "$dest" "$url"
+                  echo "$label downloaded successfully."
+                else
+                  echo "WARNING: $label missing and no URL provided."
+                fi
+              }
+              download_if_missing /models/yolo26_rice_quantized.onnx   "$RICE_MODEL_URL"   "Rice model"
+              download_if_missing /models/yolo26_coffee_quantized.onnx "$COFFEE_MODEL_URL" "Coffee model"
+              download_if_missing /models/class_names.json             "$CLASS_NAMES_URL"  "Class names"
+          volumeMounts:
+            - name: models
+              mountPath: /models
+        {{- end }}
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.service.targetPort }}
+              protocol: TCP
+          env:
+            {{- range $env := .Values.backend.env }}
+            - name: {{ $env.name }}
+              value: {{ $env.value | quote }}
+            {{- end }}
+            {{- range $secret := .Values.backend.secrets }}
+            - name: {{ $secret.name }}
+              valueFrom:
+                secretKeyRef:
+                  name: plant-disease-secrets
+                  key: {{ $secret.key }}
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.backend.livenessProbe.httpGet.path }}
+              port: {{ .Values.backend.service.targetPort }}
+            initialDelaySeconds: {{ .Values.backend.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backend.livenessProbe.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.backend.readinessProbe.httpGet.path }}
+              port: {{ .Values.backend.service.targetPort }}
+            initialDelaySeconds: {{ .Values.backend.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.backend.readinessProbe.periodSeconds }}
+          resources:
+            requests:
+              cpu: {{ .Values.backend.resources.requests.cpu }}
+              memory: {{ .Values.backend.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.backend.resources.limits.cpu }}
+              memory: {{ .Values.backend.resources.limits.memory }}
+          volumeMounts:
+            {{- if .Values.model.persistence.enabled }}
+            - name: models
+              mountPath: /models
+              readOnly: true
+            {{- end }}
+      volumes:
+        {{- if .Values.model.persistence.enabled }}
+        - name: models
+          persistentVolumeClaim:
+            claimName: {{ default .Values.model.persistence.claimName .Values.model.persistence.existingClaim }}
+        {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "plant-disease.fullname" . }}
+    app.kubernetes.io/component: backend
+spec:
+  type: {{ .Values.backend.service.type }}
+  ports:
+    - port: {{ .Values.backend.service.port }}
+      targetPort: {{ .Values.backend.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: {{ include "plant-disease.fullname" . }}
+    app.kubernetes.io/component: backend

@@ -1,0 +1,17 @@
+{{- if and .Values.model.persistence.enabled (not .Values.model.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.model.persistence.claimName }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "plant-disease.fullname" . }}
+    app.kubernetes.io/component: model
+spec:
+  accessModes:
+    - {{ .Values.model.persistence.accessMode }}
+  storageClassName: {{ .Values.model.persistence.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.model.persistence.size }}
+{{- end }}

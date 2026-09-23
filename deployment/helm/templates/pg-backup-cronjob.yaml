@@ -1,0 +1,75 @@
+{{- if .Values.postgres.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "plant-disease.fullname" . }}-pg-backup
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "plant-disease.fullname" . }}
+    app.kubernetes.io/component: backup
+spec:
+  schedule: {{ .Values.postgres.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: {{ include "plant-disease.fullname" . }}
+            app.kubernetes.io/component: backup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: pg-backup
+              image: {{ .Values.postgres.image.repository }}:{{ .Values.postgres.image.tag }}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  echo "Starting backup for database {{ .Values.postgres.auth.database }}..."
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  BACKUP_FILE="/backups/{{ .Values.postgres.auth.database }}_${TIMESTAMP}.sql.gz"
+                  
+                  PGPASSWORD=${POSTGRES_PASSWORD} pg_dump -h postgres -U {{ .Values.postgres.auth.username }} -d {{ .Values.postgres.auth.database }} | gzip > ${BACKUP_FILE}
+                  
+                  if [ $? -eq 0 ]; then
+                    echo "Backup successful: ${BACKUP_FILE}"
+                    # Cleanup old backups retaining only the last {{ .Values.postgres.backup.retentionDays }} files
+                    echo "Cleaning up old backups..."
+                    ls -tp /backups/*.sql.gz | grep -v '/$' | tail -n +{{ add .Values.postgres.backup.retentionDays 1 }} | xargs -I {} rm -- {}
+                  else
+                    echo "Backup failed!"
+                    exit 1
+                  fi
+              env:
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: plant-disease-secrets
+                      key: postgres-password
+              volumeMounts:
+                - name: backup-data
+                  mountPath: /backups
+          volumes:
+            - name: backup-data
+              persistentVolumeClaim:
+                claimName: {{ include "plant-disease.fullname" . }}-pg-backup-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "plant-disease.fullname" . }}-pg-backup-pvc
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "plant-disease.fullname" . }}
+    app.kubernetes.io/component: backup
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.postgres.backup.persistence.storageClass }}
+  resources:
+    requests:
+      storage: {{ .Values.postgres.backup.persistence.size }}
+{{- end }}

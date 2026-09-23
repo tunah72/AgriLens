@@ -1,0 +1,24 @@
+# Traefik Configuration
+
+api:
+  dashboard: true
+
+entryPoints:
+  web:
+    address: ":80"
+    # TODO: HTTP → HTTPS redirect
+  websecure:
+    address: ":443"
+
+# TODO: Certificate resolver cho Let's Encrypt + DuckDNS
+# certificatesResolvers:
+#   letsencrypt:
+#     acme:
+#       email: "TODO@email.com"
+#       storage: "/etc/traefik/acme.json"
+#       dnsChallenge:
+#         provider: duckdns
+
+providers:
+  docker:
+    exposedByDefault: false

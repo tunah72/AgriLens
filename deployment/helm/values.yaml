@@ -1,0 +1,397 @@
+# =============================================
+# Global Configuration
+# =============================================
+global:
+  namespace: plant-disease
+  domain: plant-disease-demo.duckdns.org
+
+# =============================================
+# Image Configuration
+# =============================================
+images:
+  registry: ghcr.io
+  pullPolicy: IfNotPresent
+  pullSecretName: ghcr-registry-credentials
+
+# =============================================
+# Secret placeholders
+# Override these through --set-string, a private values file, or an external secret mechanism.
+# Do not commit real production secrets.
+# =============================================
+secretsRaw:
+  jwt-secret: change-me-in-production
+  postgres-user: admin
+  postgres-password: changeme
+  minio-access-key: minioadmin
+  minio-secret-key: minioadmin
+
+# =============================================
+# Backend Configuration (FastAPI)
+# =============================================
+backend:
+  replicaCount: 1
+  
+  image:
+    repository: ghcr.io/hcmus-ml-plant-disease-detection/plant-backend
+    tag: "latest"
+  
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+  
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "2Gi"
+    limits:
+      cpu: "2000m"
+      memory: "6Gi"
+  
+  env:
+    - name: APP_ENV
+      value: "production"
+    - name: MODEL_PATH
+      value: "/models/yolo26_quantized.onnx"
+    - name: CLASS_NAMES_PATH
+      value: "/models/class_names.json"
+    - name: MODEL_INPUT_SIZE
+      value: "640"
+    - name: MODEL_VERSION
+      value: "yolo26-seg-onnx"
+    - name: SKIP_DB_INIT
+      value: "false"
+    - name: ACCESS_TOKEN_EXPIRE_MINUTES
+      value: "1440"
+    - name: POSTGRES_HOST
+      value: "postgres"
+    - name: POSTGRES_PORT
+      value: "5432"
+    - name: POSTGRES_DB
+      value: "plant_disease"
+    - name: REDIS_URL
+      value: "redis://redis:6379/0"
+    - name: MINIO_ENDPOINT
+      value: "minio:9000"
+    - name: MINIO_BUCKET
+      value: "plant-disease-images"
+    - name: MINIO_SECURE
+      value: "false"
+    - name: MLFLOW_TRACKING_URI
+      value: ""
+  
+  secrets:
+    - name: SECRET_KEY
+      key: jwt-secret
+    - name: POSTGRES_USER
+      key: postgres-user
+    - name: POSTGRES_PASSWORD
+      key: postgres-password
+    - name: MINIO_ACCESS_KEY
+      key: minio-access-key
+    - name: MINIO_SECRET_KEY
+      key: minio-secret-key
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 15
+  
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+# =============================================
+# Global Configuration
+# =============================================
+global:
+  namespace: plant-disease
+  domain: plant-disease-demo.duckdns.org
+
+# =============================================
+# Image Configuration
+# =============================================
+images:
+  registry: ghcr.io
+  pullPolicy: IfNotPresent
+  pullSecretName: ghcr-registry-credentials
+
+# =============================================
+# Secret placeholders
+# Override these through --set-string, a private values file, or an external secret mechanism.
+# Do not commit real production secrets.
+# =============================================
+secretsRaw:
+  jwt-secret: change-me-in-production
+  postgres-user: admin
+  postgres-password: changeme
+  minio-access-key: minioadmin
+  minio-secret-key: minioadmin
+
+# =============================================
+# Backend Configuration (FastAPI)
+# =============================================
+backend:
+  replicaCount: 1
+  
+  image:
+    repository: ghcr.io/hcmus-ml-plant-disease-detection/plant-backend
+    tag: "latest"
+  
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+  
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "2Gi"
+    limits:
+      cpu: "2000m"
+      memory: "6Gi"
+  
+  env:
+    - name: APP_ENV
+      value: "production"
+    - name: MODEL_PATH
+      value: "/models/yolo26_quantized.onnx"
+    - name: CLASS_NAMES_PATH
+      value: "/models/class_names.json"
+    - name: MODEL_INPUT_SIZE
+      value: "640"
+    - name: MODEL_VERSION
+      value: "yolo26-seg-onnx"
+    - name: SKIP_DB_INIT
+      value: "false"
+    - name: ACCESS_TOKEN_EXPIRE_MINUTES
+      value: "1440"
+    - name: POSTGRES_HOST
+      value: "postgres"
+    - name: POSTGRES_PORT
+      value: "5432"
+    - name: POSTGRES_DB
+      value: "plant_disease"
+    - name: REDIS_URL
+      value: "redis://redis:6379/0"
+    - name: MINIO_ENDPOINT
+      value: "minio:9000"
+    - name: MINIO_BUCKET
+      value: "plant-disease-images"
+    - name: MINIO_SECURE
+      value: "false"
+    - name: MLFLOW_TRACKING_URI
+      value: ""
+  
+  secrets:
+    - name: SECRET_KEY
+      key: jwt-secret
+    - name: POSTGRES_USER
+      key: postgres-user
+    - name: POSTGRES_PASSWORD
+      key: postgres-password
+    - name: MINIO_ACCESS_KEY
+      key: minio-access-key
+    - name: MINIO_SECRET_KEY
+      key: minio-secret-key
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 15
+  
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+
+# =============================================
+# Model artifact storage
+# The ONNX file is too large for a ConfigMap. Upload/copy it into this PVC
+# or override existingClaim to use a pre-populated claim.
+# =============================================
+model:
+  riceDownloadUrl: "https://github.com/nh-atuan/ml-vietnam-plant-disease-detection/releases/download/v1.0-models/yolo26_rice_quantized.onnx"
+  coffeeDownloadUrl: "https://github.com/nh-atuan/ml-vietnam-plant-disease-detection/releases/download/v1.0-models/yolo26_coffee_quantized.onnx"
+  classNamesDownloadUrl: "https://github.com/nh-atuan/ml-vietnam-plant-disease-detection/releases/download/v1.0-models/class_names.json"
+  persistence:
+    enabled: true
+    existingClaim: ""
+    claimName: plant-disease-models
+    size: 10Gi
+    # This PVC already exists in production. storageClassName is immutable;
+    # migrate to a new claim before changing this value.
+    storageClass: local-path
+    accessMode: ReadWriteOnce
+
+# =============================================
+# Frontend Configuration (Next.js)
+# =============================================
+frontend:
+  replicaCount: 1
+  
+  image:
+    repository: ghcr.io/hcmus-ml-plant-disease-detection/plant-frontend
+    tag: "latest"
+  
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+  
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+# =============================================
+# PostgreSQL Configuration
+# =============================================
+postgres:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "16-alpine"
+  
+  service:
+    type: ClusterIP
+    port: 5432
+  
+  auth:
+    database: plant_disease
+    username: admin
+    # Password injected via secret
+  
+  persistence:
+    enabled: true
+    size: 20Gi
+    # Kept compatible with the existing StatefulSet claim. Changing this
+    # value would mutate volumeClaimTemplates and make `helm upgrade` fail.
+    storageClass: local-path
+    mountPath: /var/lib/postgresql/data
+  
+  backup:
+    enabled: true
+    schedule: "0 2 * * *"
+    retentionDays: 7
+    persistence:
+      size: 5Gi
+      storageClass: local-path-retain
+  
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+# =============================================
+# MinIO Configuration
+# =============================================
+minio:
+  enabled: true
+  image:
+    repository: minio/minio
+    tag: latest
+  
+  service:
+    apiPort: 9000
+    consolePort: 9001
+  
+  rootUser: minioadmin
+  # Root password injected via secret
+  
+  persistence:
+    enabled: true
+    size: 30Gi
+    storageClass: local-path
+    mountPath: /data
+  
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+# =============================================
+# Redis Configuration
+# =============================================
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: "7-alpine"
+  
+  service:
+    type: ClusterIP
+    port: 6379
+  
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: local-path-retain
+  
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "200m"
+      memory: "128Mi"
+
+# =============================================
+# Ingress Configuration (Traefik)
+# =============================================
+ingress:
+  enabled: true
+  className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  
+  tls:
+    - secretName: plant-disease-tls
+      hosts:
+        - plant-disease-demo.duckdns.org
+  
+  rules:
+    - host: plant-disease-demo.duckdns.org
+      paths:
+        - path: /health
+          pathType: Prefix
+          service: backend
+          port: 8000
+        - path: /api/v1
+          pathType: Prefix
+          service: backend
+          port: 8000
+        - path: /docs
+          pathType: Prefix
+          service: backend
+          port: 8000
+        - path: /redoc
+          pathType: Prefix
+          service: backend
+          port: 8000
+        - path: /openapi.json
+          pathType: Prefix
+          service: backend
+          port: 8000
+        - path: /
+          pathType: Prefix
+          service: frontend
+          port: 3000

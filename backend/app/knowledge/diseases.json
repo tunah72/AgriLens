@@ -1,0 +1,301 @@
+{
+  "diseases": {
+    "Healthy": {
+      "label": "Healthy",
+      "name_vi": "Khỏe mạnh",
+      "name_en": "Healthy",
+      "crop": "rice/coffee",
+      "description": "Leaf exhibits no apparent signs of disease in the image. Regular monitoring is still recommended as early-stage symptoms may not yet be prominently visible on foliage.",
+      "symptoms": [
+        "Uniform green leaf blade with consistent texture.",
+        "Absence of necrotic lesions, brown spots, white powdery patches, serpentine mines, or abnormal yellow halos.",
+        "No visible damage from foliar epidermal chewing or sucking pests."
+      ],
+      "causes": [
+        "No visible pathogen or pest infestation detected in the input image.",
+        "Minor mechanical abrasions or slight physiological yellowing do not indicate infectious disease."
+      ],
+      "treatments": [
+        "Maintain current agricultural care and management practices.",
+        "Re-inspect in 3-5 days if neighboring field areas show disease foci.",
+        "Do not apply chemical pesticides based solely on a healthy diagnosis if distinct field symptoms appear."
+      ],
+      "prevention": [
+        "Maintain field and orchard sanitation; promptly remove fallen diseased foliage and plant debris.",
+        "Apply balanced fertilization, avoiding excessive nitrogen that predisposes plants to infections.",
+        "Regularly inspect leaf undersides and older canopy layers for early signs of pests or pathogens."
+      ],
+      "severity": "none",
+      "sources": [
+        {
+          "title": "IRRI Rice Knowledge Bank - pest and disease management principles",
+          "url": "http://www.knowledgebank.irri.org/"
+        }
+      ]
+    },
+    "BrownSpot": {
+      "label": "BrownSpot",
+      "name_vi": "Bệnh đốm nâu hại lúa",
+      "name_en": "Brown Spot",
+      "crop": "rice",
+      "description": "Brown spot on rice typically produces circular or oval brown lesions on the leaf surface. Disease severity increases under nutritional deficiencies, physiological stress, or unbalanced soil conditions.",
+      "symptoms": [
+        "Small, circular to oval brown spots across the leaf blade.",
+        "Lesion centers may turn light grayish-white with distinct dark brown margins.",
+        "In severe infections, lesions coalesce to form extensive blighted areas across the leaf."
+      ],
+      "causes": [
+        "Fungal pathogen (Bipolaris oryzae) overwintering on infected seeds, crop residue, or volunteer hosts.",
+        "Potassium and silicon deficiencies, nutrient-depleted soils, or impaired root systems.",
+        "High relative humidity, prolonged leaf wetness, and poor water management accelerating infection."
+      ],
+      "treatments": [
+        "Incorporate or remove infected crop residue post-harvest to reduce primary inoculum.",
+        "Adjust fertilizer regime, supplementing potassium, silicon, and lime based on local soil tests.",
+        "Maintain consistent irrigation and drainage to alleviate prolonged crop stress.",
+        "If infection spreads rapidly, consult plant protection specialists to select authorized fungicides."
+      ],
+      "prevention": [
+        "Use certified, pathogen-free seed and disease-tolerant cultivars.",
+        "Sow at recommended spacing to promote adequate canopy ventilation.",
+        "Apply balanced fertilizers with split nitrogen applications to prevent lush growth.",
+        "Closely monitor fields with a history of brown spot during early tillering."
+      ],
+      "severity": "medium",
+      "sources": [
+        {
+          "title": "IRRI Rice Knowledge Bank - rice disease resources",
+          "url": "http://www.knowledgebank.irri.org/"
+        },
+        {
+          "title": "PlantwisePlus Knowledge Bank - brown spot management references",
+          "url": "https://plantwiseplusknowledgebank.org/"
+        }
+      ]
+    },
+    "LeafBlast": {
+      "label": "LeafBlast",
+      "name_vi": "Bệnh đạo ôn lá lúa",
+      "name_en": "Leaf Blast",
+      "crop": "rice",
+      "description": "Rice leaf blast is a major destructive disease characterized by spindle- or eye-shaped lesions with grayish centers. The disease flourishes in cool, humid weather accompanied by excessive nitrogen application.",
+      "symptoms": [
+        "Spindle-shaped (elliptical) lesions with grayish-white centers and dark brown margins.",
+        "Rapid coalescence of lesions resulting in complete foliar blight and leaf death.",
+        "Severe infection stunts tillering, weakens plant vigor, and substantially reduces yield."
+      ],
+      "causes": [
+        "Magnaporthe oryzae fungus thriving under high humidity (>90%), heavy dew, and prolonged fog or rain.",
+        "Excessive nitrogen fertilizer promoting lush, succulent foliar tissue with thin epidermal walls.",
+        "Inoculum reservoirs residing on infected straw, stubble, ratoons, and adjacent fields."
+      ],
+      "treatments": [
+        "Immediately halt additional nitrogen fertilizer applications when symptoms spread.",
+        "Promote canopy aeration and maintain stable water depth to minimize plant stress.",
+        "Eliminate inoculum sources by roguing infected ratoon rice and clearing field borders.",
+        "Consult local plant protection specialists immediately for targeted fungicide interventions before panicle initiation."
+      ],
+      "prevention": [
+        "Cultivate blast-resistant rice varieties adapted to the agro-ecological region.",
+        "Adhere to optimal sowing density, avoiding overly dense canopies.",
+        "Apply balanced NPK fertilization with split nitrogen dosages matched to growth stages.",
+        "Monitor fields vigilantly during cool, damp weather, extended overcast periods, or after prolonged rainfall."
+      ],
+      "severity": "high",
+      "sources": [
+        {
+          "title": "IRRI Rice Knowledge Bank - rice blast resources",
+          "url": "http://www.knowledgebank.irri.org/"
+        }
+      ]
+    },
+    "Hispa": {
+      "label": "Hispa",
+      "name_vi": "Sâu gai hại lúa",
+      "name_en": "Rice Hispa",
+      "crop": "rice",
+      "description": "Rice hispa is a foliar insect pest. Both adult beetles and leaf-mining grubs scrape leaf epidermis and tunnel through mesophyll, creating distinctive white streaks and reducing photosynthetic area.",
+      "symptoms": [
+        "Parallel white or silvery streaks along the leaf veins.",
+        "Scraped epidermal tissue resembling narrow withered stripes.",
+        "In dense infestations, foliage turns entirely white, withers, and severely curtails plant growth."
+      ],
+      "causes": [
+        "Adult beetles feeding on upper epidermis while grubs mine inside the leaf parenchyma.",
+        "Overly dense crop stands, abundant grassy weeds, and close planting providing sheltered microclimates.",
+        "Favorable weather conditions and infested neighboring fields causing rapid population surges."
+      ],
+      "treatments": [
+        "Assess hispa population density across multiple field sampling points before taking action.",
+        "Thin out excessively dense patches to enhance sunlight penetration and aeration.",
+        "Clear weed vegetation along bunds and eliminate ratoon rice to destroy alternate hosts.",
+        "Preserve natural predators; apply registered insecticides only when economic injury thresholds are exceeded."
+      ],
+      "prevention": [
+        "Synchronize community planting schedules to disrupt continuous hispa migration cycles.",
+        "Maintain weed-free levees, bunds, and irrigation channels.",
+        "Scout young leaves and fields near infested zones following rain or humid spells.",
+        "Avoid indiscriminate broad-spectrum sprays that decimate beneficial natural enemy populations."
+      ],
+      "severity": "medium",
+      "sources": [
+        {
+          "title": "IRRI Rice Knowledge Bank - rice insect pest resources",
+          "url": "http://www.knowledgebank.irri.org/"
+        }
+      ]
+    },
+    "LeafMiner": {
+      "label": "LeafMiner",
+      "name_vi": "Sâu vẽ bùa hại lá cà phê",
+      "name_en": "Leaf Miner",
+      "crop": "coffee",
+      "description": "Coffee leaf miner larvae feed within the leaf mesophyll, creating characteristic serpentine mines or necrotic blotches. Severe infestations impair photosynthesis and induce premature leaf abscission.",
+      "symptoms": [
+        "Serpentine white or translucent mines and dry blistered patches across the leaf surface.",
+        "Mined areas turn yellowish-brown and eventually become brittle and necrotic.",
+        "Premature defoliation, particularly on older foliage and severely damaged branches."
+      ],
+      "causes": [
+        "Larvae of Leucoptera coffeella feeding exclusively on inner leaf parenchyma.",
+        "Hot, dry microclimates, water-stressed trees, and sparse shade cover favoring rapid insect reproduction.",
+        "Disruption of parasitoid wasps and predator populations due to improper chemical applications."
+      ],
+      "treatments": [
+        "Collect and destroy heavily mined fallen leaves under the tree canopy to reduce pupal emergence.",
+        "Prune trees to establish a well-aerated canopy while preserving balanced shade cover.",
+        "Assess leaf infestation percentage before initiating management interventions.",
+        "Conserve natural parasitoids; apply selective, approved bio-rational insecticides if damage thresholds are breached."
+      ],
+      "prevention": [
+        "Maintain tree vigor through balanced irrigation, mulching, and soil fertilization.",
+        "Avoid broad-spectrum chemical sprays when pest populations are below economic thresholds.",
+        "Routinely inspect mature leaves during the onset of dry periods.",
+        "Manage understory weeds and fallen leaf litter beneath the tree canopy."
+      ],
+      "severity": "medium",
+      "sources": [
+        {
+          "title": "CABI PlantwisePlus Knowledge Bank - coffee pest management references",
+          "url": "https://plantwiseplusknowledgebank.org/"
+        },
+        {
+          "title": "Research references on coffee leaf miner detection and severity",
+          "url": "https://arxiv.org/abs/1904.00742"
+        }
+      ]
+    },
+    "PowderyMildew": {
+      "label": "PowderyMildew",
+      "name_vi": "Bệnh phấn trắng trên cà phê",
+      "name_en": "Powdery Mildew",
+      "crop": "coffee",
+      "description": "Powdery mildew produces a white, powdery fungal coating over leaves, shoots, and young buds. The disease is favored by high relative humidity, poor canopy airflow, and shaded conditions.",
+      "symptoms": [
+        "Superficial white powdery patches on the upper leaf surface, young twigs, or shoots.",
+        "Curling, chlorosis, and distortion of young, developing foliage.",
+        "Heavily infected tissue undergoes necrosis, turns dull brown, and withers."
+      ],
+      "causes": [
+        "Erysiphales fungi proliferating in humid, warm conditions with poor air circulation.",
+        "Dense, unpruned canopies, inadequate sunlight penetration, or excessive nitrogen fertilization.",
+        "Airborne conidia dispersing readily across foliage via light breezes and mechanical contact."
+      ],
+      "treatments": [
+        "Prune severely affected shoots and foliage, discarding them away from the orchard.",
+        "Open the canopy through corrective pruning to enhance light penetration and reduce humidity.",
+        "Regulate irrigation schedules to avoid prolonged moisture accumulation on leaves.",
+        "When infection accelerates, consult plant health specialists to apply approved sulfur or bio-fungicide treatments."
+      ],
+      "prevention": [
+        "Perform routine pruning to ensure optimal air circulation throughout the tree canopy.",
+        "Apply balanced fertilizers, avoiding excess nitrogen that induces lush, susceptible growth.",
+        "Inspect coffee trees closely after persistent overcast, foggy, or damp weather.",
+        "Keep the ground free of dense weed cover and rotting plant residues."
+      ],
+      "severity": "medium",
+      "sources": [
+        {
+          "title": "CABI PlantwisePlus Knowledge Bank - powdery mildew management references",
+          "url": "https://plantwiseplusknowledgebank.org/"
+        }
+      ]
+    },
+    "Rust": {
+      "label": "Rust",
+      "name_vi": "Bệnh gỉ sắt cà phê",
+      "name_en": "Rust",
+      "crop": "coffee",
+      "description": "Coffee leaf rust is a devastating fungal disease identified by yellow-orange powdery pustules on the lower leaf surface. Severe infection causes massive defoliation, branch dieback, and sharp yield losses.",
+      "symptoms": [
+        "Bright yellow to orange powdery pustules (uredinia) on the underside of leaves.",
+        "Chlorotic yellow spots on the upper leaf surface corresponding to pustules below.",
+        "Diseased leaves turn necrotic, dry out, and drop prematurely, causing canopy defoliation."
+      ],
+      "causes": [
+        "Hemileia vastatrix fungus dispersing urediniospores primarily via wind, rain splash, and contact.",
+        "High humidity, prolonged leaf wetness (>24 hours), and dense tree canopies accelerating spore germination.",
+        "Nutrient depletion or high crop bearing load increasing physiological vulnerability to infection."
+      ],
+      "treatments": [
+        "Rake and compost or bury heavily infected fallen leaves to diminish the spore reservoir.",
+        "Selectively prune to enhance ventilation and accelerate canopy drying after rain.",
+        "Apply post-infection restorative nutrition to aid tree recovery.",
+        "Contact extension officers or agricultural authorities for timely application of protective copper or systemic fungicides."
+      ],
+      "prevention": [
+        "Plant rust-resistant coffee cultivars suitable for local elevation and climate.",
+        "Manage shade trees to provide balanced light, avoiding continuous high humidity.",
+        "Routinely inspect leaf undersides starting at the onset of the rainy season.",
+        "Prevent post-harvest exhaustion by maintaining adequate soil nutrient replenishment."
+      ],
+      "severity": "high",
+      "sources": [
+        {
+          "title": "CABI PlantwisePlus Knowledge Bank - coffee rust management references",
+          "url": "https://plantwiseplusknowledgebank.org/"
+        },
+        {
+          "title": "APS feature resources on coffee rust",
+          "url": "https://www.apsnet.org/"
+        }
+      ]
+    },
+    "AlgalLeafSpot": {
+      "label": "AlgalLeafSpot",
+      "name_vi": "Bệnh đốm rong trên cà phê",
+      "name_en": "Algal Leaf Spot",
+      "crop": "coffee",
+      "description": "Algal leaf spot (green scurf) produces slightly raised, velvety circular lesions with grayish-green to rust-brown coloration. It occurs primarily in damp, shaded orchards on weakened coffee trees.",
+      "symptoms": [
+        "Circular or subcircular, slightly raised spots on the leaf surface.",
+        "Lesion color transitioning from grayish-green to velvety yellowish-brown or rust-red.",
+        "Coalescing lesions reduce photosynthetic efficiency and may trigger premature yellowing and leaf drop."
+      ],
+      "causes": [
+        "Parasitic green alga (Cephaleuros virescens) thriving in warm, damp, poorly ventilated environments.",
+        "Overly dense canopies, waterlogged soil, poor air movement, and general tree debility.",
+        "Rain splash and continuous high moisture aiding the spread of zoospores across foliage."
+      ],
+      "treatments": [
+        "Prune inner branches to open the canopy and decrease ambient relative humidity.",
+        "Remove heavily infested leaves and improve soil drainage around tree basins.",
+        "Apply balanced fertilization to restore tree vigor and leaf resilience.",
+        "If defoliation occurs, consult plant protection advisors regarding targeted copper-based treatments."
+      ],
+      "prevention": [
+        "Maintain proper planting distances and canopy pruning schedules.",
+        "Control dense weed growth and wet organic matter accumulation beneath the canopy.",
+        "Scout for early lesion development following prolonged monsoon or rainy periods.",
+        "Avoid excessively dense overhead shade trees that restrict sunlight and airflow."
+      ],
+      "severity": "medium",
+      "sources": [
+        {
+          "title": "CABI PlantwisePlus Knowledge Bank - algal leaf spot management references",
+          "url": "https://plantwiseplusknowledgebank.org/"
+        }
+      ]
+    }
+  }
+}

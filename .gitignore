@@ -1,0 +1,248 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Used to bundle Python applications into stand-alone executables
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+#   For a library or package, you might want to ignore these files since the code is
+#   intended to run in multiple environments; otherwise, check them in:
+# .python-version
+
+# pipenv
+#   According to pypa/pipenv#1191, it is recommended to not check in Pipfile.lock if you are deploying into an endpoint, which is NOT the case here.
+# Pipfile.lock
+
+# poetry
+#   Similar to Pipfile.lock, it is generally recommended to check poetry.lock in for applications.
+# poetry.lock
+
+# pdm
+#   Similar to Pipfile.lock, it is generally recommended to check pdm.lock in for applications.
+# pdm.lock
+
+# PEP 582; used by e.g. github.com/pdm-project/pdm
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.env.*
+!.env.example
+!**/.env.example
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# Project-specific ignores
+datasets/
+data/*
+!data/.gitkeep
+submission/data/*
+!submission/data/README.md
+.venv-label-studio/
+
+# Node / frontend
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+frontend/out/
+frontend/.turbo/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+!frontend/src/lib/
+!frontend/src/lib/**
+
+# ML artifacts and experiment outputs
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*.ckpt
+models/*.safetensors
+models/**/*.pt
+models/**/*.pth
+models/**/*.onnx
+models/**/*.ckpt
+models/**/*.safetensors
+!models/README.md
+!models/class_names.json
+mlruns/
+ray_results/
+wandb/
+experiments/**/checkpoints/
+experiments/**/artifacts/
+experiments/**/runs/
+experiments/**/tuning/ray_results/
+
+# Unnecessary training artifacts, raw runs, and duplicate checkpoints
+artifacts/**/*.zip
+artifacts/**/runs/
+artifacts/**/yolo_dataset/
+artifacts/**/weights/
+artifacts/**/yolo26n*.pt
+artifacts/**/smoke_*
+artifacts/**/last.pt
+artifacts/**/best_yolo26n_seg_*.pt
+artifacts/**/yolo26_unified.onnx
+# Runtime storage and deployment secrets
+backend/uploads/
+backend/.cache/
+deployment/traefik/acme.json
+
+# Run-specific load-test artifacts (the durable summary is in docs/testing/)
+reports/locust*
+.tmp/
+
+# Report (LaTeX build artifacts)
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.lof
+report/*.lot
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz
+report/*.synctex(busy)
+report/*.bbl
+report/*.bcf
+report/*.blg
+report/*.run.xml
+report/*.nav
+report/*.snm
+report/*.vrb
+report/*.xdv
+report/_minted*/
+report/*.pdf
+report/appendix/*.aux
+report/content/*.aux
+report/ref/*.aux
+report/outputs
+
+.agents/
+.agent/
+.codex/
+.omp/
+.ruff_cache/
+skills-lock.json
+
+

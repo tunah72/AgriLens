@@ -44,7 +44,19 @@ class InferenceService:
             self.has_both = True
         else:
             if not model_file.exists():
-                raise FileNotFoundError(f"ONNX model not found: {model_path}")
+                candidates = [
+                    Path(".") / model_path.lstrip("/"),
+                    Path(__file__).resolve().parents[3] / model_path.lstrip("/"),
+                    Path("artifacts/yolo26_seg_joint/yolo26n_seg_joint.onnx"),
+                    Path(__file__).resolve().parents[3] / "artifacts/yolo26_seg_joint/yolo26n_seg_joint.onnx",
+                    Path("models/yolo26_quantized.onnx"),
+                ]
+                for cand in candidates:
+                    if cand.exists():
+                        model_file = cand
+                        break
+                else:
+                    raise FileNotFoundError(f"ONNX model not found: {model_path}")
             self.session = ort.InferenceSession(str(model_file), providers=["CPUExecutionProvider"])
             self.input_name = self.session.get_inputs()[0].name
             self.class_names = class_names
@@ -52,7 +64,21 @@ class InferenceService:
 
     @staticmethod
     def load_class_names(path: str) -> list[str]:
-        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        p = Path(path)
+        if not p.exists():
+            candidates = [
+                Path(".") / path.lstrip("/"),
+                Path(__file__).resolve().parents[3] / path.lstrip("/"),
+                Path("models/class_names.json"),
+                Path(__file__).resolve().parents[3] / "models/class_names.json",
+            ]
+            for cand in candidates:
+                if cand.exists():
+                    p = cand
+                    break
+            else:
+                raise FileNotFoundError(f"Class names file not found: {path}")
+        data = json.loads(p.read_text(encoding="utf-8"))
         if isinstance(data, list):
             return [str(item) for item in data]
         if isinstance(data, dict):
@@ -100,8 +126,10 @@ class InferenceService:
                     class_id = int(row[5])
                     if 0 <= class_id < class_count:
                         scores[class_id] = max(scores[class_id], conf)
+                if class_count == 8 and len(self.class_names) == 8 and self.class_names[7] == "Healthy":
+                    max_disease_conf = float(scores[:7].max())
+                    scores[7] = max(0.0, 1.0 - max_disease_conf)
                 return scores
-
             if output.shape[1] >= 4 + class_count:
                 return output[:, 4 : 4 + class_count].max(axis=0)
         if output.ndim == 2:

@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { DiseaseRecommendation } from "../lib/api";
 import { ChevronDown, ChevronUp, AlertCircle, BookOpen, ShieldCheck, HeartPulse, HelpCircle } from "lucide-react";
+import { useLanguage } from "../lib/i18n";
 
 interface RecommendationCardProps {
   recommendation?: DiseaseRecommendation | null;
@@ -12,7 +13,7 @@ interface AccordionSectionProps {
   title: string;
   isOpen: boolean;
   onToggle: () => void;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   children: React.ReactNode;
 }
 
@@ -44,6 +45,7 @@ function AccordionSection({ title, isOpen, onToggle, icon: Icon, children }: Acc
 }
 
 export default function RecommendationCard({ recommendation }: RecommendationCardProps) {
+  const { lang, t } = useLanguage();
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     description: true,
     symptoms: true,
@@ -64,9 +66,9 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
           <AlertCircle className="w-6 h-6" />
         </div>
         <div className="space-y-2">
-          <p className="text-foreground font-display font-semibold text-lg">No expert recommendation available</p>
+          <p className="text-foreground font-display font-semibold text-lg">{t("noRecommendationTitle")}</p>
           <p className="text-sm text-claude-muted max-w-sm mx-auto">
-            This classification label does not yet have supporting advice from plant protection specialists.
+            {t("noRecommendationDesc")}
           </p>
         </div>
       </div>
@@ -85,24 +87,27 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
     sources = [],
   } = recommendation;
 
+  const primaryName = lang === "vi" ? (name_vi || name_en) : (name_en || name_vi);
+  const secondaryName = lang === "vi" ? name_en : name_vi;
+
   return (
     <div className="w-full space-y-6">
       <div className="border-b border-surface-border/50 pb-4">
         <h4 className="text-xs font-display font-bold uppercase tracking-widest text-claude-orange/80">
-          Expert Recommendation
+          {t("expertRecommendation")}
         </h4>
-        <h3 className="text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
-          {name_en || name_vi}
+        <h3 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold text-foreground mt-2">
+          {primaryName}
         </h3>
-        {name_vi && name_en && (
-          <p className="text-sm text-claude-muted italic mt-1">{name_vi}</p>
+        {secondaryName && secondaryName !== primaryName && (
+          <p className="text-sm text-claude-muted italic mt-1">{secondaryName}</p>
         )}
       </div>
 
       <div className="space-y-3">
         {description && (
           <AccordionSection
-            title="Detailed Description"
+            title={t("detailedDescription")}
             isOpen={!!openSections.description}
             onToggle={() => toggleSection("description")}
             icon={BookOpen}
@@ -113,7 +118,7 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
 
         {symptoms.length > 0 && (
           <AccordionSection
-            title="Typical Symptoms"
+            title={t("typicalSymptoms")}
             isOpen={!!openSections.symptoms}
             onToggle={() => toggleSection("symptoms")}
             icon={HelpCircle}
@@ -128,7 +133,7 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
 
         {causes.length > 0 && (
           <AccordionSection
-            title="Underlying Causes"
+            title={t("underlyingCauses")}
             isOpen={!!openSections.causes}
             onToggle={() => toggleSection("causes")}
             icon={AlertCircle}
@@ -143,7 +148,7 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
 
         {treatments.length > 0 && (
           <AccordionSection
-            title="Treatments & Remedies"
+            title={t("treatmentsRemedies")}
             isOpen={!!openSections.treatments}
             onToggle={() => toggleSection("treatments")}
             icon={HeartPulse}
@@ -158,7 +163,7 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
 
         {prevention.length > 0 && (
           <AccordionSection
-            title="Prevention Measures"
+            title={t("preventionMeasures")}
             isOpen={!!openSections.prevention}
             onToggle={() => toggleSection("prevention")}
             icon={ShieldCheck}
@@ -173,8 +178,8 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
       </div>
 
       {advisory && (
-        <div className="p-3.5 border-l-4 border-warning-500/50 bg-warning-50 dark:bg-warning-500/10 text-warning-700 dark:text-warning-400 dark:text-orange-200 rounded-r-xl text-xs leading-relaxed font-semibold">
-          <span className="font-bold">Advisory Note: </span>
+        <div className="p-3.5 border-l-4 border-warning-500/50 bg-warning-50 dark:bg-warning-500/10 text-warning-700 dark:text-warning-400 rounded-r-xl text-xs leading-relaxed font-semibold">
+          <span className="font-bold">{t("advisoryNote")} </span>
           {advisory}
         </div>
       )}
@@ -182,7 +187,7 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
       {sources.length > 0 && (
         <div className="pt-4 border-t border-surface-border/50 space-y-2">
           <h5 className="text-[10px] font-bold text-claude-muted uppercase tracking-wider">
-            References
+            {t("references")}
           </h5>
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
             {sources.map((src, idx) => (

@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import AuthForm from "../AuthForm";
 import type { UseAuthReturn } from "../../hooks/useAuth";
 import { ApiError } from "../../lib/api";
+import { LanguageProvider } from "../../lib/i18n";
 
 function makeAuth(overrides: Partial<UseAuthReturn> = {}) {
   return {
@@ -21,39 +22,52 @@ function makeAuth(overrides: Partial<UseAuthReturn> = {}) {
 }
 
 describe("AuthForm", () => {
-  it("associates visible login labels, help text, and autocomplete values", () => {
+  it("associates visible login labels, help text, and autocomplete values in Vietnamese by default", () => {
     render(<AuthForm auth={makeAuth()} onSuccess={vi.fn()} />);
 
-    const username = screen.getByLabelText("Username");
-    const password = screen.getByLabelText("Password");
+    const username = screen.getByLabelText("Tên đăng nhập");
+    const password = screen.getByLabelText("Mật khẩu");
     expect(username).toHaveAttribute("autocomplete", "username");
     expect(password).toHaveAttribute("autocomplete", "current-password");
     expect(username).toHaveAttribute("aria-describedby", "auth-username-hint");
     expect(password).toHaveAttribute("aria-describedby", "auth-password-hint");
   });
 
+  it("supports English labels when LanguageProvider is set to English", () => {
+    render(
+      <LanguageProvider defaultLang="en">
+        <AuthForm auth={makeAuth()} onSuccess={vi.fn()} />
+      </LanguageProvider>
+    );
+
+    const username = screen.getByLabelText("Username");
+    const password = screen.getByLabelText("Password");
+    expect(username).toHaveAttribute("autocomplete", "username");
+    expect(password).toHaveAttribute("autocomplete", "current-password");
+  });
+
   it("associates registration fields and uses registration autocomplete values", async () => {
     const user = userEvent.setup();
     render(<AuthForm auth={makeAuth()} onSuccess={vi.fn()} />);
 
-    await user.click(screen.getByRole("button", { name: "Sign Up" }));
+    await user.click(screen.getByRole("button", { name: "Đăng ký" }));
 
-    expect(screen.getByLabelText("Username")).toHaveAttribute("autocomplete", "username");
-    expect(screen.getByLabelText("Email Address")).toHaveAttribute("autocomplete", "email");
-    expect(screen.getByLabelText("Password")).toHaveAttribute("autocomplete", "new-password");
+    expect(screen.getByLabelText("Tên đăng nhập")).toHaveAttribute("autocomplete", "username");
+    expect(screen.getByLabelText("Địa chỉ Email")).toHaveAttribute("autocomplete", "email");
+    expect(screen.getByLabelText("Mật khẩu")).toHaveAttribute("autocomplete", "new-password");
   });
 
   it("shows associated validation errors and focuses the first invalid field", async () => {
     const user = userEvent.setup();
     render(<AuthForm auth={makeAuth()} onSuccess={vi.fn()} />);
 
-    await user.click(within(screen.getByRole("form", { name: "Sign in form" })).getByRole("button", { name: "Sign In" }));
+    await user.click(within(screen.getByRole("form", { name: "Biểu mẫu đăng nhập" })).getByRole("button", { name: "Đăng nhập" }));
 
-    const username = screen.getByLabelText("Username");
+    const username = screen.getByLabelText("Tên đăng nhập");
     expect(username).toHaveFocus();
     expect(username).toHaveAttribute("aria-invalid", "true");
     expect(username).toHaveAttribute("aria-describedby", "auth-username-hint auth-username-error");
-    expect(screen.getByText("Username must contain at least 3 characters.")).toHaveAttribute("id", "auth-username-error");
+    expect(screen.getByText("Tên đăng nhập phải có ít nhất 3 ký tự.")).toHaveAttribute("id", "auth-username-error");
   });
 
   it("prevents duplicate submits and announces the loading action", async () => {
@@ -62,13 +76,13 @@ describe("AuthForm", () => {
     const login = vi.fn(() => new Promise<void>((resolve) => { resolveLogin = resolve; }));
     render(<AuthForm auth={makeAuth({ login })} onSuccess={vi.fn()} />);
 
-    await user.type(screen.getByLabelText("Username"), "farmer");
-    await user.type(screen.getByLabelText("Password"), "secret1");
-    const submit = within(screen.getByRole("form", { name: "Sign in form" })).getByRole("button", { name: "Sign In" });
+    await user.type(screen.getByLabelText("Tên đăng nhập"), "farmer");
+    await user.type(screen.getByLabelText("Mật khẩu"), "secret1");
+    const submit = within(screen.getByRole("form", { name: "Biểu mẫu đăng nhập" })).getByRole("button", { name: "Đăng nhập" });
     await user.click(submit);
 
     expect(submit).toBeDisabled();
-    expect(screen.getByText("Processing credentials…")).toBeVisible();
+    expect(screen.getByText("Đang xử lý thông tin…")).toBeVisible();
     await user.click(submit);
     expect(login).toHaveBeenCalledTimes(1);
 
@@ -86,9 +100,9 @@ describe("AuthForm", () => {
     }));
     render(<AuthForm auth={makeAuth({ login })} onSuccess={onSuccess} />);
 
-    await user.type(screen.getByLabelText("Username"), "farmer");
-    await user.type(screen.getByLabelText("Password"), "secret1");
-    await user.click(within(screen.getByRole("form", { name: "Sign in form" })).getByRole("button", { name: "Sign In" }));
+    await user.type(screen.getByLabelText("Tên đăng nhập"), "farmer");
+    await user.type(screen.getByLabelText("Mật khẩu"), "secret1");
+    await user.click(within(screen.getByRole("form", { name: "Biểu mẫu đăng nhập" })).getByRole("button", { name: "Đăng nhập" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Incorrect username or password.");
     expect(onSuccess).not.toHaveBeenCalled();
@@ -100,9 +114,9 @@ describe("AuthForm", () => {
     const login = vi.fn().mockResolvedValue(undefined);
     render(<AuthForm auth={makeAuth({ login })} onSuccess={onSuccess} />);
 
-    await user.type(screen.getByLabelText("Username"), "farmer");
-    await user.type(screen.getByLabelText("Password"), "secret1");
-    await user.click(within(screen.getByRole("form", { name: "Sign in form" })).getByRole("button", { name: "Sign In" }));
+    await user.type(screen.getByLabelText("Tên đăng nhập"), "farmer");
+    await user.type(screen.getByLabelText("Mật khẩu"), "secret1");
+    await user.click(within(screen.getByRole("form", { name: "Biểu mẫu đăng nhập" })).getByRole("button", { name: "Đăng nhập" }));
 
     await waitFor(() => expect(login).toHaveBeenCalledWith("farmer", "secret1"));
     expect(onSuccess).toHaveBeenCalledTimes(1);
@@ -114,11 +128,11 @@ describe("AuthForm", () => {
     const register = vi.fn().mockResolvedValue(undefined);
     render(<AuthForm auth={makeAuth({ register })} onSuccess={onSuccess} />);
 
-    await user.click(screen.getByRole("button", { name: "Sign Up" }));
-    await user.type(screen.getByLabelText("Username"), "farmer");
-    await user.type(screen.getByLabelText("Email Address"), "farmer@example.com");
-    await user.type(screen.getByLabelText("Password"), "secret1");
-    await user.click(within(screen.getByRole("form", { name: "Sign up form" })).getByRole("button", { name: "Create Account & Sign In" }));
+    await user.click(screen.getByRole("button", { name: "Đăng ký" }));
+    await user.type(screen.getByLabelText("Tên đăng nhập"), "farmer");
+    await user.type(screen.getByLabelText("Địa chỉ Email"), "farmer@example.com");
+    await user.type(screen.getByLabelText("Mật khẩu"), "secret1");
+    await user.click(within(screen.getByRole("form", { name: "Biểu mẫu đăng ký" })).getByRole("button", { name: "Tạo tài khoản & Đăng nhập" }));
 
     await waitFor(() => expect(register).toHaveBeenCalledWith("farmer", "farmer@example.com", "secret1"));
     expect(onSuccess).toHaveBeenCalledTimes(1);
@@ -134,11 +148,11 @@ describe("AuthForm", () => {
     }));
     render(<AuthForm auth={makeAuth({ register })} onSuccess={vi.fn()} />);
 
-    await user.click(screen.getByRole("button", { name: "Sign Up" }));
-    await user.type(screen.getByLabelText("Username"), "farmer");
-    await user.type(screen.getByLabelText("Email Address"), "farmer@example.com");
-    await user.type(screen.getByLabelText("Password"), "secret1");
-    await user.click(within(screen.getByRole("form", { name: "Sign up form" })).getByRole("button", { name: "Create Account & Sign In" }));
+    await user.click(screen.getByRole("button", { name: "Đăng ký" }));
+    await user.type(screen.getByLabelText("Tên đăng nhập"), "farmer");
+    await user.type(screen.getByLabelText("Địa chỉ Email"), "farmer@example.com");
+    await user.type(screen.getByLabelText("Mật khẩu"), "secret1");
+    await user.click(within(screen.getByRole("form", { name: "Biểu mẫu đăng ký" })).getByRole("button", { name: "Tạo tài khoản & Đăng nhập" }));
 
     expect(await screen.findByText("This email address is already in use.")).toBeVisible();
     expect(screen.queryByText(/database password leaked/i)).not.toBeInTheDocument();

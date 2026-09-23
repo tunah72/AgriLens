@@ -1,10 +1,10 @@
 [
-  "BrownSpot",
-  "Healthy",
-  "Hispa",
-  "LeafBlast",
   "LeafMiner",
   "PowderyMildew",
   "Rust",
-  "AlgalLeafSpot"
+  "AlgalLeafSpot",
+  "BrownSpot",
+  "Hispa",
+  "LeafBlast",
+  "Healthy"
 ]

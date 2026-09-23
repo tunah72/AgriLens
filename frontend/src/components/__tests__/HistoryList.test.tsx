@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { HistoryItem } from "../../lib/api";
 import { fetchHistory } from "../../lib/api";
 import HistoryList from "../HistoryList";
+import { LanguageProvider } from "../../lib/i18n";
 
 vi.mock("../../lib/api", () => ({
   fetchHistory: vi.fn(),
@@ -38,26 +39,40 @@ describe("HistoryList pagination", () => {
     });
   });
 
-  it("navigates deterministically across three pages for eleven records", async () => {
+  it("navigates deterministically across three pages for eleven records in Vietnamese by default", async () => {
     const user = userEvent.setup();
 
     render(<HistoryList token="demo-token" onLoginPrompt={vi.fn()} onStartDiagnosis={vi.fn()} />);
 
     expect(await screen.findByText("Disease 1")).toBeVisible();
-    expect(screen.getByText("Page 1 of 3")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Previous page" })).toBeDisabled();
+    expect(screen.getByText("Trang 1 / 3")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Trang trước" })).toBeDisabled();
 
-    await user.click(screen.getByRole("button", { name: "Page 2" }));
+    await user.click(screen.getByRole("button", { name: "Trang 2" }));
     expect(await screen.findByText("Disease 6")).toBeVisible();
-    expect(screen.getByText("Page 2 of 3")).toBeVisible();
+    expect(screen.getByText("Trang 2 / 3")).toBeVisible();
 
-    await user.click(screen.getByRole("button", { name: "Next page" }));
+    await user.click(screen.getByRole("button", { name: "Trang sau" }));
     expect(await screen.findByText("Disease 11")).toBeVisible();
-    expect(screen.getByText("Page 3 of 3")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Next page" })).toBeDisabled();
+    expect(screen.getByText("Trang 3 / 3")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Trang sau" })).toBeDisabled();
 
     await waitFor(() => {
       expect(mockFetchHistory).toHaveBeenNthCalledWith(3, "demo-token", 3, 5);
     });
+  });
+
+  it("supports English pagination when LanguageProvider specifies English", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <LanguageProvider defaultLang="en">
+        <HistoryList token="demo-token" onLoginPrompt={vi.fn()} onStartDiagnosis={vi.fn()} />
+      </LanguageProvider>
+    );
+
+    expect(await screen.findByText("Disease 1")).toBeVisible();
+    expect(screen.getByText("Page 1 of 3")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Previous page" })).toBeDisabled();
   });
 });

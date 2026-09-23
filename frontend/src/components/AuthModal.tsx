@@ -2,24 +2,34 @@
 
 import React from "react";
 import AuthForm from "./AuthForm";
-import { useAuth } from "../hooks/useAuth";
+import type { UseAuthReturn } from "../hooks/useAuth";
 import { Dialog, DialogContent } from "./ui/Dialog";
+import { useLanguage } from "../lib/i18n";
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  auth: ReturnType<typeof useAuth>;
+  auth: UseAuthReturn;
   sessionMessage?: string | null;
   restoreFocusRef?: React.RefObject<HTMLElement | null>;
   fallbackFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
-export default function AuthModal({ isOpen, onClose, auth, sessionMessage, restoreFocusRef, fallbackFocusRef }: AuthModalProps) {
+export default function AuthModal({
+  isOpen,
+  onClose,
+  auth,
+  sessionMessage,
+  restoreFocusRef,
+  fallbackFocusRef,
+}: AuthModalProps) {
+  const { t } = useLanguage();
+
   return (
     <Dialog open={isOpen} onClose={onClose}>
       <DialogContent
-        title="PlantDisease AI Account"
-        description="Sign in to save and review your leaf diagnosis history."
+        title={t("authTitle")}
+        description={t("authDesc")}
         restoreFocusRef={restoreFocusRef}
         fallbackFocusRef={fallbackFocusRef}
       >

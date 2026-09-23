@@ -4,6 +4,7 @@ import React, { useRef, useState } from "react";
 import { Camera, X, Paperclip, Send, Image as ImageIcon } from "lucide-react";
 import { ALLOWED_IMAGE_TYPES, MAX_FILE_SIZE_BYTES } from "../lib/constants";
 import { useObjectUrl } from "../hooks/useObjectUrl";
+import { useLanguage } from "../lib/i18n";
 
 interface ImageUploaderProps {
   selectedFile: File | null;
@@ -20,6 +21,7 @@ export default function ImageUploader({
   onSubmit,
   error,
 }: ImageUploaderProps) {
+  const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
@@ -31,12 +33,12 @@ export default function ImageUploader({
     }
 
     if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-      onFileSelect(null, "Only JPEG, PNG, or WEBP image formats are supported.");
+      onFileSelect(null, t("unsupportedFormat"));
       return;
     }
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
-      onFileSelect(null, "Image file size exceeds the 10 MB limit.");
+      onFileSelect(null, t("fileTooLarge"));
       return;
     }
 
@@ -124,7 +126,7 @@ export default function ImageUploader({
               type="button"
               onClick={handleReset}
               className="p-2 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 transition-colors"
-              aria-label="Remove file"
+              aria-label={t("removeFile")}
             >
               <X className="w-4 h-4" />
             </button>
@@ -139,11 +141,11 @@ export default function ImageUploader({
               className="w-full text-center sm:text-left text-sm text-claude-muted py-4 px-2 cursor-pointer font-medium select-none flex flex-col sm:flex-row items-center gap-2"
             >
               <ImageIcon className="w-5 h-5 opacity-50" />
-              {"Drag & drop or click to select leaf image (Coffee / Rice)"}
+              {t("dragDropPrompt")}
             </div>
           ) : (
             <div className="w-full text-center sm:text-left text-sm text-foreground py-3 px-2 font-medium">
-              Ready for diagnosis
+              {t("readyToDiagnose")}
             </div>
           )}
         </div>
@@ -156,7 +158,8 @@ export default function ImageUploader({
               type="button"
               onClick={triggerFileSelect}
               className="p-1.5 rounded-lg text-claude-muted hover:text-claude-text hover:bg-interactive-hover dark:hover:bg-stone-800 transition-all"
-              title="Attach image from device"
+              title={t("attachDevice")}
+              aria-label={t("attachDevice")}
             >
               <Paperclip className="w-4 h-4" />
             </button>
@@ -164,7 +167,8 @@ export default function ImageUploader({
               type="button"
               onClick={triggerCameraSelect}
               className="p-1.5 rounded-lg text-claude-muted hover:text-claude-text hover:bg-interactive-hover dark:hover:bg-stone-800 transition-all"
-              title="Take photo with camera"
+              title={t("takePhoto")}
+              aria-label={t("takePhoto")}
             >
               <Camera className="w-4 h-4" />
             </button>
@@ -177,12 +181,13 @@ export default function ImageUploader({
             disabled={isSubmitting || !selectedFile}
             className={`p-2 rounded-xl shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-claude-orange/20 ${
               isSubmitting
-                ? "bg-stone-300 dark:bg-stone-700 cursor-not-allowed text-stone-500 text-stone-400"
+                ? "bg-stone-300 dark:bg-stone-700 cursor-not-allowed text-stone-500"
                 : selectedFile
                 ? "bg-claude-orange hover:bg-claude-orange-hover text-claude-orange-text"
                 : "bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-600 cursor-not-allowed"
             }`}
-            title="Start diagnosis"
+            title={t("startDiagnosisBtn")}
+            aria-label={t("startDiagnosisBtn")}
           >
             {isSubmitting ? (
               <span className="w-4 h-4 block border-2 border-claude-orange-text/30 border-t-claude-orange-text rounded-full animate-spin" />
@@ -213,7 +218,7 @@ export default function ImageUploader({
       {/* Errors */}
       {error && (
         <div className="p-3 border border-danger-500/10 bg-danger-50 dark:bg-danger-500/10 text-danger-700 dark:text-danger-400 rounded-xl text-xs font-medium flex gap-2 items-start animate-in fade-in duration-200">
-          <span className="font-bold flex-shrink-0">Error:</span>
+          <span className="font-bold flex-shrink-0">{t("errorPrefix")}</span>
           <span>{error}</span>
         </div>
       )}

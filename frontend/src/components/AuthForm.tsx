@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { UseAuthReturn } from "../hooks/useAuth";
 import { ApiError } from "../lib/api";
+import { useLanguage, Language } from "../lib/i18n";
 
 type AuthField = "username" | "email" | "password";
 
@@ -10,6 +11,7 @@ interface AuthFormProps {
   onSuccess: () => void;
   auth: UseAuthReturn;
   notice?: string | null;
+  lang?: Language;
 }
 
 const fieldIds: Record<AuthField, string> = {
@@ -18,13 +20,11 @@ const fieldIds: Record<AuthField, string> = {
   password: "auth-password",
 };
 
-const fieldHints: Record<AuthField, string> = {
-  username: "Use 3 or more characters.",
-  email: "Enter your active email address.",
-  password: "Use 6 or more characters.",
-};
+export default function AuthForm({ onSuccess, auth, notice, lang: propLang }: AuthFormProps) {
+  const context = useLanguage();
+  const lang = propLang ?? context.lang;
+  const t = context.t;
 
-export default function AuthForm({ onSuccess, auth, notice }: AuthFormProps) {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -37,6 +37,12 @@ export default function AuthForm({ onSuccess, auth, notice }: AuthFormProps) {
     email: null,
     password: null,
   });
+
+  const fieldHints: Record<AuthField, string> = {
+    username: lang === "vi" ? "Sử dụng từ 3 ký tự trở lên." : "Use 3 or more characters.",
+    email: lang === "vi" ? "Nhập địa chỉ email hợp lệ của bạn." : "Enter your active email address.",
+    password: lang === "vi" ? "Sử dụng từ 6 ký tự trở lên." : "Use 6 or more characters.",
+  };
 
   useEffect(() => {
     if (notice) setFormError(notice);
@@ -57,13 +63,20 @@ export default function AuthForm({ onSuccess, auth, notice }: AuthFormProps) {
     const nextErrors: Partial<Record<AuthField, string>> = {};
 
     if (username.trim().length < 3) {
-      nextErrors.username = "Username must contain at least 3 characters.";
+      nextErrors.username =
+        lang === "vi"
+          ? "Tên đăng nhập phải có ít nhất 3 ký tự."
+          : "Username must contain at least 3 characters.";
     }
     if (!isLoginMode && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      nextErrors.email = "Invalid email address.";
+      nextErrors.email =
+        lang === "vi" ? "Địa chỉ email không hợp lệ." : "Invalid email address.";
     }
     if (password.length < 6) {
-      nextErrors.password = "Password must contain at least 6 characters.";
+      nextErrors.password =
+        lang === "vi"
+          ? "Mật khẩu phải có ít nhất 6 ký tự."
+          : "Password must contain at least 6 characters.";
     }
 
     setFieldErrors(nextErrors);
@@ -94,7 +107,11 @@ export default function AuthForm({ onSuccess, auth, notice }: AuthFormProps) {
         setFieldErrors(error.fieldErrors);
         setFormError(error.message);
       } else {
-        setFormError("Unable to complete authentication. Please try again.");
+        setFormError(
+          lang === "vi"
+            ? "Không thể hoàn thành xác thực. Vui lòng thử lại."
+            : "Unable to complete authentication. Please try again."
+        );
       }
     } finally {
       setIsSubmitting(false);
@@ -107,9 +124,18 @@ export default function AuthForm({ onSuccess, auth, notice }: AuthFormProps) {
     return ids.join(" ");
   };
 
+  const signInLabel = lang === "vi" ? "Đăng nhập" : "Sign In";
+  const signUpLabel = lang === "vi" ? "Đăng ký" : "Sign Up";
+  const usernameLabel = lang === "vi" ? "Tên đăng nhập" : "Username";
+  const emailLabel = lang === "vi" ? "Địa chỉ Email" : "Email Address";
+  const passwordLabel = lang === "vi" ? "Mật khẩu" : "Password";
+  const processingText = lang === "vi" ? "Đang xử lý thông tin…" : "Processing credentials…";
+  const createAccountBtn =
+    lang === "vi" ? "Tạo tài khoản & Đăng nhập" : "Create Account & Sign In";
+
   return (
     <div className="w-full space-y-5">
-      <div className="flex border-b border-surface-border" aria-label="Select authentication method">
+      <div className="flex border-b border-surface-border" aria-label={t("authMethodLabel")}>
         <button
           type="button"
           onClick={() => switchMode(true)}
@@ -120,7 +146,7 @@ export default function AuthForm({ onSuccess, auth, notice }: AuthFormProps) {
               : "border-transparent text-text-secondary hover:text-claude-text"
           }`}
         >
-          Sign In
+          {signInLabel}
         </button>
         <button
           type="button"
@@ -132,7 +158,7 @@ export default function AuthForm({ onSuccess, auth, notice }: AuthFormProps) {
               : "border-transparent text-text-secondary hover:text-claude-text"
           }`}
         >
-          Sign Up
+          {signUpLabel}
         </button>
       </div>
 
@@ -141,11 +167,11 @@ export default function AuthForm({ onSuccess, auth, notice }: AuthFormProps) {
         className="space-y-4"
         noValidate
         aria-busy={isSubmitting}
-        aria-label={isLoginMode ? "Sign in form" : "Sign up form"}
+        aria-label={isLoginMode ? (lang === "vi" ? "Biểu mẫu đăng nhập" : "Sign in form") : (lang === "vi" ? "Biểu mẫu đăng ký" : "Sign up form")}
       >
         <div>
           <label htmlFor={fieldIds.username} className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-claude-muted">
-            Username
+            {usernameLabel}
           </label>
           <input
             ref={(element) => { inputRefs.current.username = element; }}
@@ -171,7 +197,7 @@ export default function AuthForm({ onSuccess, auth, notice }: AuthFormProps) {
         {!isLoginMode && (
           <div>
             <label htmlFor={fieldIds.email} className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-claude-muted">
-              Email Address
+              {emailLabel}
             </label>
             <input
               ref={(element) => { inputRefs.current.email = element; }}
@@ -197,7 +223,7 @@ export default function AuthForm({ onSuccess, auth, notice }: AuthFormProps) {
 
         <div>
           <label htmlFor={fieldIds.password} className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-claude-muted">
-            Password
+            {passwordLabel}
           </label>
           <input
             ref={(element) => { inputRefs.current.password = element; }}
@@ -234,12 +260,12 @@ export default function AuthForm({ onSuccess, auth, notice }: AuthFormProps) {
           {isSubmitting ? (
             <>
               <span className="mr-1.5 h-3.5 w-3.5 animate-spin rounded-full border-2 border-claude-orange-text/30 border-t-claude-orange-text" aria-hidden="true" />
-              <span aria-live="polite">Processing credentials…</span>
+              <span aria-live="polite">{processingText}</span>
             </>
           ) : isLoginMode ? (
-            "Sign In"
+            signInLabel
           ) : (
-            "Create Account & Sign In"
+            createAccountBtn
           )}
         </button>
       </form>

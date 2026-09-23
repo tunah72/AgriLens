@@ -3,12 +3,15 @@
 import React from "react";
 import { TopKPrediction } from "../lib/api";
 import { getDiseaseDisplayName } from "../lib/disease-labels";
+import { useLanguage } from "../lib/i18n";
 
 interface TopKListProps {
   topK: TopKPrediction[];
 }
 
 export default function TopKList({ topK }: TopKListProps) {
+  const { lang, t } = useLanguage();
+
   if (!topK || topK.length === 0) return null;
 
   const hasClosePrediction =
@@ -20,10 +23,10 @@ export default function TopKList({ topK }: TopKListProps) {
     <div className="w-full p-5 bg-surface-raised border border-surface-border rounded-xl shadow-sm space-y-4">
       <div>
         <h4 className="text-sm font-semibold uppercase tracking-wider text-claude-muted">
-          Alternative Diagnoses Considered
+          {t("alternativeDiagnoses")}
         </h4>
         <p className="text-xs text-claude-muted mt-0.5">
-          Confidence scores of top ranked candidates
+          {t("alternativeDesc")}
         </p>
       </div>
 
@@ -38,7 +41,9 @@ export default function TopKList({ topK }: TopKListProps) {
           return (
             <div key={item.label} className="space-y-1.5">
               <div className="flex justify-between text-xs font-semibold">
-                <span className="text-claude-text truncate">{getDiseaseDisplayName(item.label)}</span>
+                <span className="text-claude-text truncate">
+                  {getDiseaseDisplayName(item.label, lang)}
+                </span>
                 <span className="text-claude-text">{percentage}%</span>
               </div>
               <div className="w-full h-2 bg-surface border border-surface-border/20 rounded-full overflow-hidden">
@@ -61,10 +66,10 @@ export default function TopKList({ topK }: TopKListProps) {
       {hasClosePrediction && (
         <div className="p-3.5 bg-warning-50 dark:bg-warning-500/10 border border-warning-100/50 dark:border-warning-500/20 text-warning-700 dark:text-warning-300 rounded-lg text-xs space-y-1.5 animate-in fade-in duration-200">
           <p className="font-bold flex items-center gap-1">
-            ⚠️ Close Margin Prediction
+            ⚠️ {t("closeMarginWarningTitle")}
           </p>
           <p className="leading-relaxed font-medium">
-            The top two predicted classes differ by less than 10%. Recommendation: Compare field symptoms against the Knowledge Base or capture clearer photos for optimal diagnosis.
+            {t("closeMarginWarningDesc")}
           </p>
         </div>
       )}

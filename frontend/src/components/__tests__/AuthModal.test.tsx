@@ -4,7 +4,8 @@ import userEvent from "@testing-library/user-event";
 import React, { useRef, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 import AuthModal from "../AuthModal";
-import { useAuth } from "../../hooks/useAuth";
+import type { UseAuthReturn } from "../../hooks/useAuth";
+import { LanguageProvider } from "../../lib/i18n";
 
 vi.mock("../AuthForm", () => ({
   default: () => <form aria-label="Authentication form"><button type="submit">Sign In</button></form>,
@@ -17,20 +18,30 @@ const auth = {
   login: vi.fn(),
   register: vi.fn(),
   logout: vi.fn(),
-} as unknown as ReturnType<typeof useAuth>;
+} as unknown as UseAuthReturn;
 
 describe("AuthModal", () => {
-  it("provides a semantic dialog and closes on Escape", async () => {
+  it("provides a semantic dialog with AgriLens title and closes on Escape", async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();
 
     render(<AuthModal isOpen onClose={onClose} auth={auth} />);
 
-    expect(screen.getByRole("dialog", { name: "PlantDisease AI Account" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Tài khoản AgriLens" })).toBeInTheDocument();
 
     await user.keyboard("{Escape}");
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("supports English title when LanguageProvider is set to English", () => {
+    render(
+      <LanguageProvider defaultLang="en">
+        <AuthModal isOpen onClose={vi.fn()} auth={auth} />
+      </LanguageProvider>
+    );
+
+    expect(screen.getByRole("dialog", { name: "AgriLens Account" })).toBeInTheDocument();
   });
 
   it("uses a visible close button rather than overlay-only dismissal", async () => {
@@ -43,7 +54,6 @@ describe("AuthModal", () => {
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
-
   it("restores focus to the opener when the controlled dialog closes", async () => {
     const user = userEvent.setup();
 

@@ -6,7 +6,6 @@ import PredictionResult from "../components/PredictionResult";
 import TopKList from "../components/TopKList";
 import RecommendationCard from "../components/RecommendationCard";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
-import EmptyState from "../components/ui/EmptyState";
 import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import AuthModal from "../components/AuthModal";
@@ -17,10 +16,12 @@ import { usePrediction } from "../hooks/usePrediction";
 import { useAuth } from "../hooks/useAuth";
 import { TabId } from "../components/TabNav";
 import { useObjectUrl } from "../hooks/useObjectUrl";
-import { BentoGrid, BentoGridItem } from "../components/layout/BentoGrid";
+import { BentoGrid } from "../components/layout/BentoGrid";
 import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "../components/animations/Animations";
+import { useLanguage } from "../lib/i18n";
 
 export default function Home() {
+  const { t } = useLanguage();
   const auth = useAuth();
   const {
     selectedFile,
@@ -91,13 +92,13 @@ export default function Home() {
   const getActiveTabLabel = () => {
     switch (activeTab) {
       case "diagnosis":
-        return "Diagnosis";
+        return t("diagnosis");
       case "knowledge":
-        return "Knowledge Base";
+        return t("knowledge");
       case "history":
-        return "Diagnosis History";
+        return t("history");
       default:
-        return "Diagnosis";
+        return t("diagnosis");
     }
   };
 
@@ -133,14 +134,14 @@ export default function Home() {
                 {!prediction && !isSubmitting ? (
                   <StaggerItem>
                     <div className="flex flex-col items-center justify-center text-center py-12 md:py-20">
-                      <h2 className="text-5xl md:text-6xl font-display font-bold text-foreground tracking-tight leading-[1.1]">
-                        Start Leaf Diagnosis
+                      <h2 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold text-foreground tracking-tight leading-[1.15]">
+                        {t("heroTitle")}
                       </h2>
-                      <p className="mt-4 text-claude-muted font-sans max-w-lg">
-                        Upload an image of a diseased crop leaf for real-time AI diagnosis and expert care recommendations.
+                      <p className="mt-4 text-claude-muted font-sans max-w-lg leading-relaxed">
+                        {t("heroSubtitle")}
                       </p>
-                      <div className="w-full max-w-2xl mt-12">
-                        <div className="glass-panel rounded-3xl p-8 premium-shadow">
+                      <div className="w-full max-w-2xl mt-10">
+                        <div className="glass-panel rounded-3xl p-6 sm:p-8 premium-shadow">
                           <ImageUploader
                             onSubmit={handlePredictSubmit}
                             onFileSelect={handleFileSelect}
@@ -160,10 +161,11 @@ export default function Home() {
                       <StaggerItem className="col-span-1 md:col-span-1">
                         <div className="glass-panel p-6 rounded-2xl h-full flex flex-col premium-shadow">
                           <h3 className="text-sm font-display font-bold uppercase tracking-widest text-claude-muted mb-4">
-                            Uploaded Image
+                            {t("uploadedImage")}
                           </h3>
                           {selectedFile && (
-                            <div className="relative rounded-xl overflow-hidden flex-1 bg-surface-raised border border-surface-border">
+                            <div className="relative rounded-xl overflow-hidden flex-1 min-h-[240px] bg-surface-raised border border-surface-border">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={selectedImageUrl ?? undefined}
                                 alt="Uploaded leaf image for diagnosis"
@@ -190,20 +192,20 @@ export default function Home() {
                         {isSubmitting ? (
                           <div className="glass-panel rounded-2xl p-12 flex flex-col items-center justify-center gap-4 h-full premium-shadow">
                             <LoadingSpinner />
-                            <p className="text-lg font-display font-medium text-foreground">Analyzing leaf image...</p>
+                            <p className="text-lg font-display font-medium text-foreground">{t("analyzingImage")}</p>
                           </div>
                         ) : (
                           prediction && (
                             <div className="flex flex-col gap-4 h-full">
                               <div className="glass-panel rounded-2xl p-6 premium-shadow">
                                 <h3 className="text-sm font-display font-bold uppercase tracking-widest text-claude-muted mb-4">
-                                  Analysis Results
+                                  {t("analysisResults")}
                                 </h3>
                                 <PredictionResult prediction={prediction} />
                               </div>
                               <div className="glass-panel rounded-2xl p-6 premium-shadow">
                                 <h3 className="text-sm font-display font-bold uppercase tracking-widest text-claude-muted mb-4">
-                                  Confidence & Alternatives
+                                  {t("confidenceAlternatives")}
                                 </h3>
                                 <TopKList topK={prediction.top_k} />
                               </div>
@@ -238,7 +240,7 @@ export default function Home() {
                 ) : (
                   <>
                     <h2 className="text-2xl font-display font-bold text-foreground mb-6">
-                      Plant Disease Knowledge Base
+                      {t("knowledgeBaseTitle")}
                     </h2>
                     <div className="glass-panel rounded-3xl p-6 premium-shadow">
                       <KnowledgeList onSelectDisease={setSelectedDisease} />
@@ -251,7 +253,7 @@ export default function Home() {
             {activeTab === "history" && (
               <SlideUp className="space-y-4 pb-10">
                 <h2 className="text-2xl font-display font-bold text-foreground mb-6">
-                  Diagnosis History
+                  {t("historyTitle")}
                 </h2>
                 <div className="glass-panel rounded-3xl p-6 premium-shadow">
                   <HistoryList

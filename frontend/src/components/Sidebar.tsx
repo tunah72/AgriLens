@@ -5,6 +5,7 @@ import { BookOpen, ChevronLeft, ChevronRight, History, Leaf, LogIn, Plus } from 
 import type { UserResponse } from "../lib/api";
 import { TabId } from "./TabNav";
 import AccountMenu from "./ui/AccountMenu";
+import { useLanguage, Language } from "../lib/i18n";
 
 interface SidebarProps {
   activeTab: TabId;
@@ -17,22 +18,8 @@ interface SidebarProps {
   onLoginClick: () => void;
   isCollapsed?: boolean;
   onCollapsedChange?: (collapsed: boolean) => void;
+  lang?: Language;
 }
-
-const menuItems = [
-  {
-    id: "knowledge" as TabId,
-    label: "Knowledge Base",
-    mobileLabel: "Knowledge",
-    icon: BookOpen,
-  },
-  {
-    id: "history" as TabId,
-    label: "Diagnosis History",
-    mobileLabel: "History",
-    icon: History,
-  },
-];
 
 export default function Sidebar({
   activeTab,
@@ -45,17 +32,37 @@ export default function Sidebar({
   onLoginClick,
   isCollapsed: controlledCollapsed,
   onCollapsedChange,
+  lang: propLang,
 }: SidebarProps) {
+  const context = useLanguage();
+  const t = context.t;
   const [internalCollapsed, setInternalCollapsed] = useState(false);
   const isCollapsed = controlledCollapsed ?? internalCollapsed;
+
   const toggleCollapsed = () => {
     const nextCollapsed = !isCollapsed;
     onCollapsedChange?.(nextCollapsed);
     if (controlledCollapsed === undefined) setInternalCollapsed(nextCollapsed);
   };
 
+  const menuItems = [
+    {
+      id: "knowledge" as TabId,
+      label: t("knowledge"),
+      mobileLabel: t("knowledgeShort"),
+      icon: BookOpen,
+    },
+    {
+      id: "history" as TabId,
+      label: t("history"),
+      mobileLabel: t("historyShort"),
+      icon: History,
+    },
+  ];
+
   return (
     <>
+      {/* Mobile Bottom Navigation */}
       <nav
         className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around gap-1 border-t border-surface-border bg-surface-sidebar px-2 py-2 shadow-lg lg:hidden"
         aria-label="Main navigation"
@@ -72,7 +79,7 @@ export default function Sidebar({
           }`}
         >
           <Plus className="mb-0.5 h-5 w-5" aria-hidden="true" />
-          <span>Diagnose</span>
+          <span>{t("diagnosis")}</span>
         </button>
 
         {menuItems.map((item) => {
@@ -98,7 +105,7 @@ export default function Sidebar({
         })}
 
         {isLoading ? (
-          <div className="flex h-11 w-11 items-center justify-center text-claude-muted" role="status" aria-label="Loading account status">
+          <div className="flex h-11 w-11 items-center justify-center text-claude-muted" role="status" aria-label={t("loadingAccount")}>
             <span className="h-5 w-5 animate-spin rounded-full border-2 border-claude-orange/30 border-t-claude-orange" aria-hidden="true" />
           </div>
         ) : user ? (
@@ -108,13 +115,14 @@ export default function Sidebar({
             type="button"
             onClick={onLoginClick}
             className="inline-flex h-11 w-11 flex-col items-center justify-center rounded-xl border border-surface-border bg-surface-raised text-text-secondary shadow-sm transition-colors hover:bg-surface-sidebar hover:text-claude-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2 focus-visible:ring-offset-surface-sidebar"
-            aria-label="Sign in"
+            aria-label={t("signIn")}
           >
             <LogIn className="h-5 w-5" aria-hidden="true" />
           </button>
         )}
       </nav>
 
+      {/* Desktop Sidebar */}
       <aside
         className={`fixed left-0 top-0 z-30 hidden h-screen flex-col border-r border-surface-border bg-surface-sidebar transition-[width] duration-300 lg:flex ${
           isCollapsed ? "w-[72px]" : "w-64"
@@ -125,7 +133,7 @@ export default function Sidebar({
           {!isCollapsed ? (
             <div className="flex items-center gap-2">
               <Leaf className="h-5 w-5 fill-claude-orange/10 text-claude-orange" aria-hidden="true" />
-              <span className="text-lg font-serif font-bold tracking-tight text-foreground">PlantDisease AI</span>
+              <span className="text-xl font-serif font-bold tracking-tight text-foreground">{t("brand")}</span>
             </div>
           ) : (
             <Leaf className="mx-auto h-5 w-5 text-claude-orange" aria-hidden="true" />
@@ -134,7 +142,7 @@ export default function Sidebar({
             type="button"
             onClick={toggleCollapsed}
             className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-interactive-active hover:text-claude-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2 focus-visible:ring-offset-surface-sidebar"
-            aria-label={isCollapsed ? "Expand navigation bar" : "Collapse navigation bar"}
+            aria-label={isCollapsed ? t("expandNav") : t("collapseNav")}
           >
             {isCollapsed ? <ChevronRight className="h-4 w-4" aria-hidden="true" /> : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}
           </button>
@@ -148,10 +156,10 @@ export default function Sidebar({
             className={`flex w-full min-h-11 items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface-raised px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-surface-hover hover:border-border-hover disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2 focus-visible:ring-offset-surface-sidebar ${
               isCollapsed ? "rounded-full p-2" : ""
             } ${activeTab === "diagnosis" ? "border-claude-orange/60 ring-2 ring-claude-orange/20" : ""}`}
-            title="New diagnosis"
+            title={t("newDiagnosis")}
           >
             <Plus className="h-4 w-4 shrink-0 text-claude-orange" aria-hidden="true" />
-            {!isCollapsed && <span className="text-foreground">New diagnosis</span>}
+            {!isCollapsed && <span className="text-foreground">{t("newDiagnosis")}</span>}
           </button>
         </div>
 
@@ -182,7 +190,7 @@ export default function Sidebar({
 
         <div className="border-t border-surface-border/50 p-3">
           {isLoading ? (
-            <div className="flex min-h-11 items-center justify-center text-claude-muted" role="status" aria-label="Loading account status">
+            <div className="flex min-h-11 items-center justify-center text-claude-muted" role="status" aria-label={t("loadingAccount")}>
               <span className="h-5 w-5 animate-spin rounded-full border-2 border-claude-orange/30 border-t-claude-orange" aria-hidden="true" />
             </div>
           ) : user ? (
@@ -194,11 +202,11 @@ export default function Sidebar({
               className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface-raised px-3 py-2 text-xs font-semibold shadow-sm transition-colors hover:bg-surface-hover hover:border-border-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2 focus-visible:ring-offset-surface-sidebar ${
                 isCollapsed ? "rounded-full p-2" : ""
               }`}
-              title="Sign in"
-              aria-label={isCollapsed ? "Sign in" : undefined}
+              title={t("signIn")}
+              aria-label={isCollapsed ? t("signIn") : undefined}
             >
               <LogIn className="h-4 w-4 shrink-0 text-claude-orange" aria-hidden="true" />
-              {!isCollapsed && <span className="text-claude-text">Sign in</span>}
+              {!isCollapsed && <span className="text-claude-text">{t("signIn")}</span>}
             </button>
           )}
         </div>

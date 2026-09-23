@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     SKIP_DB_INIT: bool = False
     MODEL_PATH: str = "/models/yolo26_quantized.onnx"
     CLASS_NAMES_PATH: str = "/models/class_names.json"
-    MODEL_INPUT_SIZE: int = 640
+    MODEL_INPUT_SIZE: int = 1024
     MODEL_VERSION: str = "yolo26-seg-onnx"
 
     # Authentication

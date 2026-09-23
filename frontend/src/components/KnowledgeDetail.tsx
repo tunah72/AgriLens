@@ -6,6 +6,7 @@ import { fetchKnowledgeDetail, DiseaseRecommendation } from "../lib/api";
 import LoadingSpinner from "./ui/LoadingSpinner";
 import ErrorMessage from "./ui/ErrorMessage";
 import RecommendationCard from "./RecommendationCard";
+import { useLanguage } from "../lib/i18n";
 
 interface KnowledgeDetailProps {
   diseaseLabel: string;
@@ -13,6 +14,7 @@ interface KnowledgeDetailProps {
 }
 
 export default function KnowledgeDetail({ diseaseLabel, onBack }: KnowledgeDetailProps) {
+  const { t } = useLanguage();
   const [disease, setDisease] = useState<DiseaseRecommendation | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,7 @@ export default function KnowledgeDetail({ diseaseLabel, onBack }: KnowledgeDetai
       const data = await fetchKnowledgeDetail(diseaseLabel);
       setDisease(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load details for this disease.");
+      setError(err instanceof Error ? err.message : t("knowledgeDetailError"));
     } finally {
       setIsLoading(false);
     }
@@ -52,7 +54,7 @@ export default function KnowledgeDetail({ diseaseLabel, onBack }: KnowledgeDetai
           className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-claude-text bg-surface-raised border border-surface-border rounded-xl hover:bg-interactive-hover transition-all shadow-sm focus:outline-none"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          Back to list
+          {t("backToList")}
         </button>
         <ErrorMessage message={error} onRetry={loadDiseaseDetail} />
       </div>
@@ -67,7 +69,7 @@ export default function KnowledgeDetail({ diseaseLabel, onBack }: KnowledgeDetai
         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-claude-text bg-surface-raised border border-surface-border rounded-xl hover:bg-interactive-hover transition-all shadow-sm focus:outline-none"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
-        Back to list
+        {t("backToList")}
       </button>
 
       {disease && <RecommendationCard recommendation={disease} />}

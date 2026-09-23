@@ -5,14 +5,15 @@ import { fetchKnowledgeList, DiseaseRecommendation } from "../lib/api";
 import LoadingSpinner from "./ui/LoadingSpinner";
 import ErrorMessage from "./ui/ErrorMessage";
 import EmptyState from "./ui/EmptyState";
-import { BookOpen } from "lucide-react";
-import { BentoGrid, BentoGridItem } from "./layout/BentoGrid";
+import { BentoGrid } from "./layout/BentoGrid";
+import { useLanguage } from "../lib/i18n";
 
 interface KnowledgeListProps {
   onSelectDisease: (label: string) => void;
 }
 
 export default function KnowledgeList({ onSelectDisease }: KnowledgeListProps) {
+  const { lang, t } = useLanguage();
   const [diseases, setDiseases] = useState<DiseaseRecommendation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +25,7 @@ export default function KnowledgeList({ onSelectDisease }: KnowledgeListProps) {
       const res = await fetchKnowledgeList();
       setDiseases(res.items || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect to the knowledge base.");
+      setError(err instanceof Error ? err.message : t("knowledgeConnectError"));
     } finally {
       setIsLoading(false);
     }
@@ -32,6 +33,7 @@ export default function KnowledgeList({ onSelectDisease }: KnowledgeListProps) {
 
   useEffect(() => {
     loadKnowledgeList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (isLoading) {
@@ -54,8 +56,8 @@ export default function KnowledgeList({ onSelectDisease }: KnowledgeListProps) {
   if (diseases.length === 0) {
     return (
       <EmptyState
-        title="Knowledge Base is empty"
-        description="No plant disease records found in the knowledge base."
+        title={t("emptyKnowledgeTitle")}
+        description={t("emptyKnowledgeDesc")}
       />
     );
   }
@@ -65,6 +67,22 @@ export default function KnowledgeList({ onSelectDisease }: KnowledgeListProps) {
       <BentoGrid className="md:auto-rows-[16rem]">
         {diseases.map((disease) => {
           const { label, name_vi, name_en, crop, severity, description } = disease;
+          const primaryName = lang === "vi" ? (name_vi || name_en) : (name_en || name_vi);
+          const secondaryName = lang === "vi" ? name_en : name_vi;
+
+          const cropDisplay =
+            crop === "rice"
+              ? t("cropRice")
+              : crop === "coffee"
+              ? t("cropCoffee")
+              : crop;
+
+          const severityDisplay =
+            severity?.toLowerCase() === "high" || severity?.toLowerCase() === "severe"
+              ? t("severityHigh")
+              : severity?.toLowerCase() === "medium" || severity?.toLowerCase() === "moderate"
+              ? t("severityMedium")
+              : t("severityLow");
           
           return (
             <button
@@ -77,11 +95,11 @@ export default function KnowledgeList({ onSelectDisease }: KnowledgeListProps) {
               <div className="relative z-10 space-y-2">
                 <div className="flex justify-between items-start gap-2">
                   <h4 className="font-display font-bold text-foreground text-xl leading-snug group-hover:text-claude-orange transition-colors">
-                    {name_en || name_vi}
+                    {primaryName}
                   </h4>
                 </div>
-                {name_vi && name_en && (
-                  <p className="text-sm font-sans text-claude-muted italic">{name_vi}</p>
+                {secondaryName && secondaryName !== primaryName && (
+                  <p className="text-sm font-sans text-claude-muted italic">{secondaryName}</p>
                 )}
                 {description && (
                   <p className="text-sm text-claude-muted line-clamp-2 mt-2 leading-relaxed">
@@ -92,7 +110,7 @@ export default function KnowledgeList({ onSelectDisease }: KnowledgeListProps) {
 
               <div className="relative z-10 flex gap-2 pt-4 border-t border-surface-border/50">
                 <span className="text-xs px-2.5 py-1 bg-surface-raised border border-surface-border text-foreground font-semibold rounded-md shadow-sm">
-                  {crop === "rice" ? "Rice" : crop === "coffee" ? "Coffee" : crop}
+                  {cropDisplay}
                 </span>
                 {severity && (
                   <span className={`text-xs px-2.5 py-1 font-semibold rounded-md border shadow-sm ${
@@ -102,7 +120,7 @@ export default function KnowledgeList({ onSelectDisease }: KnowledgeListProps) {
                       ? "bg-warning-50 text-warning-700 border-warning-500/20 dark:bg-warning-900/20 dark:text-warning-400"
                       : "bg-healthy-50 text-healthy-700 border-healthy-500/20 dark:bg-healthy-900/20 dark:text-healthy-400"
                   }`}>
-                    {severity === "high" || severity === "severe" ? "High" : severity === "medium" || severity === "moderate" ? "Medium" : "Low"}
+                    {severityDisplay}
                   </span>
                 )}
               </div>

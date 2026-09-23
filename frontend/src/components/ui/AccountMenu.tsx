@@ -4,6 +4,7 @@ import React from "react";
 import { DropdownMenu } from "radix-ui";
 import { ChevronUp, LogOut, UserRound } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { useLanguage } from "../../lib/i18n";
 
 interface AccountMenuProps {
   username: string;
@@ -16,6 +17,7 @@ function getInitials(username: string) {
 }
 
 export default function AccountMenu({ username, onLogout, variant = "sidebar" }: AccountMenuProps) {
+  const { t } = useLanguage();
   const isMobile = variant === "mobile";
 
   return (
@@ -35,7 +37,7 @@ export default function AccountMenu({ username, onLogout, variant = "sidebar" }:
           {!isMobile && (
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-semibold leading-tight text-claude-text">{username}</span>
-              <span className="block text-[10px] font-medium leading-none text-claude-muted">Your Account</span>
+              <span className="block text-[10px] font-medium leading-none text-claude-muted">{t("yourAccount")}</span>
             </span>
           )}
           {!isMobile && <ChevronUp className="h-4 w-4 shrink-0" aria-hidden="true" />}
@@ -59,7 +61,7 @@ export default function AccountMenu({ username, onLogout, variant = "sidebar" }:
             className="flex min-h-11 cursor-pointer select-none items-center gap-2 rounded-lg px-2.5 py-2 text-danger-700 outline-none transition-colors data-[highlighted]:bg-danger-50 data-[highlighted]:text-danger-700 dark:data-[highlighted]:bg-danger-500/10"
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />
-            Sign Out
+            {t("signOut")}
           </DropdownMenu.Item>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>

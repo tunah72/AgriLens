@@ -3,12 +3,14 @@
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { useLanguage, Language } from "../../lib/i18n";
 
 interface PaginationProps {
   page: number;
   totalPages: number;
   isLoading?: boolean;
   onPageChange: (page: number) => void;
+  lang?: Language;
 }
 
 type PageItem = number | "ellipsis";
@@ -26,7 +28,17 @@ function getPageItems(page: number, totalPages: number): PageItem[] {
 const controlClassName =
   "inline-flex h-11 min-w-11 items-center justify-center rounded-lg border border-surface-border bg-surface-raised px-2 text-sm font-semibold text-claude-text shadow-sm transition-colors hover:bg-surface-sidebar disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
-export default function Pagination({ page, totalPages, isLoading = false, onPageChange }: PaginationProps) {
+export default function Pagination({
+  page,
+  totalPages,
+  isLoading = false,
+  onPageChange,
+  lang: propLang,
+}: PaginationProps) {
+  const context = useLanguage();
+  const lang = propLang ?? context.lang;
+  const t = context.t;
+
   if (totalPages <= 1) return null;
 
   const pageItems = getPageItems(page, totalPages);
@@ -36,10 +48,15 @@ export default function Pagination({ page, totalPages, isLoading = false, onPage
     }
   };
 
+  const pageText = lang === "vi" ? `Trang ${page} / ${totalPages}` : `Page ${page} of ${totalPages}`;
+  const prevLabel = lang === "vi" ? "Trang trước" : "Previous page";
+  const nextLabel = lang === "vi" ? "Trang sau" : "Next page";
+  const pageLabel = (item: number) => (lang === "vi" ? `Trang ${item}` : `Page ${item}`);
+
   return (
     <nav className="flex flex-col gap-3 border-t border-surface-border pt-4 sm:flex-row sm:items-center sm:justify-between" aria-label="Pagination">
       <p className="text-center text-xs font-medium text-claude-muted sm:text-left" aria-live="polite">
-        Page {page} of {totalPages}
+        {pageText}
       </p>
       <div className="flex items-center justify-center gap-1.5">
         <button
@@ -47,7 +64,7 @@ export default function Pagination({ page, totalPages, isLoading = false, onPage
           onClick={() => goToPage(page - 1)}
           disabled={isLoading || page === 1}
           className={controlClassName}
-          aria-label="Previous page"
+          aria-label={prevLabel}
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -62,7 +79,7 @@ export default function Pagination({ page, totalPages, isLoading = false, onPage
               type="button"
               onClick={() => goToPage(item)}
               disabled={isLoading}
-              aria-label={`Page ${item}`}
+              aria-label={pageLabel(item)}
               aria-current={item === page ? "page" : undefined}
               className={cn(
                 controlClassName,
@@ -78,7 +95,7 @@ export default function Pagination({ page, totalPages, isLoading = false, onPage
           onClick={() => goToPage(page + 1)}
           disabled={isLoading || page === totalPages}
           className={controlClassName}
-          aria-label="Next page"
+          aria-label={nextLabel}
         >
           <ChevronRight className="h-4 w-4" aria-hidden="true" />
         </button>

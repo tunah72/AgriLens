@@ -8,6 +8,8 @@ import ErrorMessage from "./ui/ErrorMessage";
 import EmptyState from "./ui/EmptyState";
 import Pagination from "./ui/Pagination";
 import RecommendationCard from "./RecommendationCard";
+import { useLanguage } from "../lib/i18n";
+import { DISEASE_LABELS_VI, DISEASE_LABELS_EN } from "../lib/disease-labels";
 
 interface HistoryListProps {
   token: string | null;
@@ -18,6 +20,7 @@ interface HistoryListProps {
 const PAGE_SIZE = 5;
 
 export default function HistoryList({ token, onLoginPrompt, onStartDiagnosis }: HistoryListProps) {
+  const { lang, t } = useLanguage();
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -40,11 +43,11 @@ export default function HistoryList({ token, onLoginPrompt, onStartDiagnosis }: 
       setExpandedItemId(null);
       setHasLoaded(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load diagnosis history.");
+      setError(err instanceof Error ? err.message : t("historyLoadError"));
     } finally {
       setIsLoading(false);
     }
-  }, [token]);
+  }, [token, t]);
 
   useEffect(() => {
     if (token) {
@@ -61,7 +64,7 @@ export default function HistoryList({ token, onLoginPrompt, onStartDiagnosis }: 
 
   const formatDate = (dateStr: string) => {
     try {
-      return new Date(dateStr).toLocaleString("en-US", {
+      return new Date(dateStr).toLocaleString(lang === "vi" ? "vi-VN" : "en-US", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -80,9 +83,9 @@ export default function HistoryList({ token, onLoginPrompt, onStartDiagnosis }: 
           <LogIn className="h-8 w-8" aria-hidden="true" />
         </div>
         <div className="space-y-2">
-          <p className="text-xl font-display font-bold text-foreground">Personal Diagnosis History</p>
+          <p className="text-xl font-display font-bold text-foreground">{t("signInPromptTitle")}</p>
           <p className="mx-auto max-w-sm text-sm font-sans leading-relaxed text-claude-muted">
-            Sign in to your account to automatically track leaf diagnoses and consult expert treatment recommendations anytime.
+            {t("signInPromptDesc")}
           </p>
         </div>
         <button
@@ -90,7 +93,7 @@ export default function HistoryList({ token, onLoginPrompt, onStartDiagnosis }: 
           onClick={onLoginPrompt}
           className="inline-flex min-h-11 items-center gap-1.5 rounded-lg bg-claude-orange px-4 py-2.5 text-xs font-semibold text-claude-orange-text shadow-sm transition-colors hover:bg-claude-orange-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2"
         >
-          Sign In Now
+          {t("signInNow")}
         </button>
       </div>
     );
@@ -111,9 +114,17 @@ export default function HistoryList({ token, onLoginPrompt, onStartDiagnosis }: 
   if (historyItems.length === 0) {
     return (
       <EmptyState
-        title="Diagnosis history is empty"
-        description="You have not performed any diagnosis sessions yet while signed in. Try uploading an image to diagnose, and results will automatically appear here."
-        action={<button type="button" onClick={onStartDiagnosis} className="min-h-11 rounded-lg bg-claude-orange px-4 py-2 text-sm font-semibold text-claude-orange-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2">New Diagnosis</button>}
+        title={t("emptyHistoryTitle")}
+        description={t("emptyHistoryDesc")}
+        action={
+          <button
+            type="button"
+            onClick={onStartDiagnosis}
+            className="min-h-11 rounded-lg bg-claude-orange px-4 py-2 text-sm font-semibold text-claude-orange-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2"
+          >
+            {t("newDiagnosis")}
+          </button>
+        }
       />
     );
   }
@@ -123,14 +134,25 @@ export default function HistoryList({ token, onLoginPrompt, onStartDiagnosis }: 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-wider text-claude-muted">All Diagnoses ({total})</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-claude-muted">
+          {t("allDiagnoses")} ({total})
+        </p>
       </div>
 
       <div className="space-y-3" aria-busy={isLoading}>
         {historyItems.map((item) => {
           const isExpanded = expandedItemId === item.id;
-          const diseaseName = item.recommendation?.name_en || item.recommendation?.name_vi || item.predicted_label;
+          const diseaseName =
+            lang === "vi"
+              ? (item.recommendation?.name_vi || item.recommendation?.name_en || DISEASE_LABELS_VI[item.predicted_label] || item.predicted_label)
+              : (item.recommendation?.name_en || item.recommendation?.name_vi || DISEASE_LABELS_EN[item.predicted_label] || item.predicted_label);
           const crop = item.recommendation?.crop;
+          const cropDisplay =
+            crop === "rice"
+              ? t("cropRice")
+              : crop === "coffee"
+              ? t("cropCoffee")
+              : crop;
 
           return (
             <div
@@ -166,7 +188,7 @@ export default function HistoryList({ token, onLoginPrompt, onStartDiagnosis }: 
                       </span>
                       {crop && (
                         <span className="rounded bg-surface-border/50 px-2 py-0.5 text-[10px] font-semibold text-foreground">
-                          {crop === "rice" ? "Rice" : crop === "coffee" ? "Coffee" : crop}
+                          {cropDisplay}
                         </span>
                       )}
                     </div>
@@ -176,7 +198,9 @@ export default function HistoryList({ token, onLoginPrompt, onStartDiagnosis }: 
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <div className="text-xl font-display font-bold text-claude-orange">{Math.round(item.confidence * 100)}%</div>
-                    <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-claude-muted">Confidence</div>
+                    <div className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-claude-muted">
+                      {t("confidenceScores")}
+                    </div>
                   </div>
                   <span className="inline-flex h-11 w-11 items-center justify-center rounded-full text-claude-muted" aria-hidden="true">
                     <ChevronRight className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-90" : ""}`} aria-hidden="true" />

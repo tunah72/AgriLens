@@ -59,6 +59,10 @@ export const translations = {
     crop: "Cây trồng",
     cropRice: "Lúa",
     cropCoffee: "Cà phê",
+    cropRiceCoffee: "Lúa & Cà phê",
+    healthyStatusNote: "Tình trạng lá bình thường, không ghi nhận vết bệnh",
+    confidenceLowNote: "Độ tin cậy chưa cao ({conf}%). Khuyến nghị: Chụp lại ảnh lá rõ nét hơn hoặc đối chiếu trực tiếp trên đồng ruộng.",
+    confidenceGoodNote: "Độ tin cậy chẩn đoán: {conf}%.",
     severity: "Mức độ gây hại",
     severityHigh: "Nghiêm trọng (Cao)",
     severityMedium: "Trung bình",
@@ -69,6 +73,12 @@ export const translations = {
     closeMarginWarningTitle: "Cảnh báo độ chênh lệch thấp",
     closeMarginWarningDesc: "Hai bệnh dự đoán hàng đầu chênh lệch dưới 10%. Khuyến nghị: Đối chiếu thêm triệu chứng ngoài đồng ruộng trong mục Cơ sở tri thức hoặc chụp lại ảnh sắc nét hơn.",
 
+    // Segmentation & Visualization
+    viewModeOriginal: "Ảnh gốc",
+    viewModeAnnotated: "Phân vùng bệnh",
+    detectedLesions: "Số đốm bệnh",
+    lesionArea: "Tỷ lệ tổn thương",
+    noLesionsDetected: "Không phát hiện vùng tổn thương rõ rệt",
     // Expert Recommendation
     expertRecommendation: "Khuyến nghị điều trị từ chuyên gia",
     detailedDescription: "Mô tả chi tiết bệnh học",
@@ -184,11 +194,22 @@ export const translations = {
     severityHigh: "High",
     severityMedium: "Medium",
     severityLow: "Low",
+    cropRiceCoffee: "Rice & Coffee",
+    healthyStatusNote: "Normal foliage, no pathological symptoms detected",
+    confidenceLowNote: "Low confidence ({conf}%). Recommendation: Capture a clearer photo or inspect directly in the field.",
+    confidenceGoodNote: "Diagnosis confidence: {conf}%.",
     confidenceAlternatives: "Confidence & Alternatives",
     alternativeDiagnoses: "Alternative Diagnoses Considered",
     alternativeDesc: "Confidence scores of top ranked candidates",
     closeMarginWarningTitle: "Close Margin Prediction",
     closeMarginWarningDesc: "The top two predicted classes differ by less than 10%. Recommendation: Compare field symptoms against the Knowledge Base or capture clearer photos for optimal diagnosis.",
+
+    // Segmentation & Visualization
+    viewModeOriginal: "Original Image",
+    viewModeAnnotated: "Disease Segmentation",
+    detectedLesions: "Detected Lesions",
+    lesionArea: "Affected Leaf Area",
+    noLesionsDetected: "No distinct lesion spots detected",
 
     // Expert Recommendation
     expertRecommendation: "Expert Recommendation",

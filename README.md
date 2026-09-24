@@ -9,31 +9,40 @@ The system encompasses the complete machine learning engineering lifecycle: auto
 
 ```mermaid
 flowchart TB
-    subgraph Client["Frontend Client (Next.js 15)"]
-        UI["Web Interface (Tailwind CSS)"]
-        Uploader["Foliar Image Uploader"]
-        Trust["Trust Signals & Top-K Predictions"]
-        KB_UI["Knowledge Base Browser"]
-        Hist_UI["Personal Diagnosis Audit History"]
+    subgraph Client["Frontend Client: AgriLens (Next.js 15)"]
+        UI["Web Interface (Tailwind CSS, React 19)"]
+        Uploader["Foliar Image Drag-and-Drop & Camera Upload"]
+        SegViz["Segmentation Mask Visualizer & Lesion Damage Metrics"]
+        Trust["Trust Signals & Top-K Candidates Distribution"]
+        KB_UI["Bilingual Agricultural Advisory (VI / EN)"]
+        Hist_UI["Personal Diagnostic Audit History"]
     end
 
     subgraph Gateway["API Gateway & Reverse Proxy"]
-        Traefik["Traefik Ingress Controller"]
+        Traefik["Traefik / Nginx Ingress Reverse Proxy"]
     end
 
     subgraph BackendServices["Backend Application Tier (FastAPI)"]
-        API["FastAPI REST Server"]
-        InferenceEngine["ONNX Runtime Engine (YOLO26-seg)"]
-        KB["Expert Agricultural Knowledge Base"]
-        AuthSvc["JWT Authentication & RBAC"]
-        StorageSvc["MinIO Storage Client"]
+        API["FastAPI Asynchronous REST Server"]
+        InferenceEngine["ONNX Runtime Engine (YOLO26-seg FP32 & INT8)"]
+        SegRenderer["Mask Decoder, Contour & Bounding Box Renderer"]
+        KB["Expert Agricultural Knowledge Base (Bilingual)"]
+        AuthSvc["JWT Authentication, RBAC & Token Revocation"]
+        StorageSvc["MinIO Storage Client (Upload & Orphan Cleanup)"]
+        CacheLimiter["Redis Cache & Sliding-Window Rate Limiter"]
         DBSvc["SQLModel / PostgreSQL ORM"]
     end
 
     subgraph DataTier["Storage & Persistence Tier"]
-        PG[(PostgreSQL 16)]
-        MinIO[(MinIO Object Storage)]
-        Redis[(Redis Cache)]
+        PG[(PostgreSQL 16: Users, Images, Predictions)]
+        MinIO[(MinIO Object Storage: Raw Leaf & Annotated Masks)]
+        Redis[(Redis 7: Caching, Rate Limiting, Token Blacklist)]
+    end
+
+    subgraph MLOpsTier["MLOps & Experiment Registry"]
+        MLflow[(MLflow Tracking Server :5001)]
+        ExpImporter["Kaggle Run & Metric Importer"]
+        PipeLogger["Dataset Repair & Quantization Logger"]
     end
 
     subgraph DataPipeline["Data Collection & Annotation"]
@@ -46,13 +55,19 @@ flowchart TB
     UI --> Traefik
     Traefik --> API
     API --> InferenceEngine
+    InferenceEngine --> SegRenderer
+    API --> SegRenderer
     API --> KB
     API --> AuthSvc
     API --> StorageSvc
     API --> DBSvc
+    API --> CacheLimiter
+    CacheLimiter --> Redis
+    AuthSvc --> Redis
     DBSvc --> PG
     StorageSvc --> MinIO
-    API --> Redis
+    ExpImporter --> MLflow
+    PipeLogger --> MLflow
     Crawler --> VLM --> ReviewUI --> SAM3 --> MinIO
 ```
 
@@ -60,14 +75,13 @@ flowchart TB
 
 ## 2. Key Features
 
-- **Real-Time Foliar Instance Segmentation:** Evaluates high-resolution leaf images using an optimized **YOLO26-seg (ONNX runtime)** model, delivering precise lesion boundary detection and class identification with low latency (~205 ms on standard CPU at full $1024 \times 1024$ native resolution).
-- **Expert Agricultural Knowledge Base:** Integrated rule-based disease advisory covering 7 distinct foliar disease pathologies plus asymptomatic healthy controls across rice and coffee. Provides immediate etiology, typical symptoms, chemical/biological remedies, and preventive agronomic practices.
-- **Advanced Automated Dataset Pipeline:** High-throughput scraping via [Crawl4AI](https://github.com/unclecode/crawl4ai) and DuckDuckGo/Serper, automated candidate pre-labeling using Vision-Language Models, polygon mask synthesis with **SAM 3 (Segment Anything Model)**, and human verification through an in-house Streamlit application.
-- **Modern Cloud-Native Backend:** FastAPI asynchronous server with SQLModel/PostgreSQL persistence for user accounts and audit logging, MinIO S3-compatible storage for raw and annotated imagery, and Redis for caching.
-- **Accessible International Frontend:** Responsive Next.js 15 (App Router) interface built with Tailwind CSS, supporting drag-and-drop uploads, mobile camera captures, Top-K confidence metrics, and bilingual disease data.
-- **DevOps & Quality Engineering:** Docker Compose for local orchestration, Helm charts for K3s lightweight Kubernetes deployments, comprehensive Pytest unit/integration test suites, and Locust load testing.
-
----
+- **Real-Time Foliar Instance Segmentation & Visualization:** Evaluates high-resolution leaf images at $1024 \times 1024$ native resolution using an optimized **YOLO26-seg (ONNX runtime)** model. Automatically renders lesion contours, bounding boxes, and transparent colored overlays, returning lesion counts, damage surface area percentages, and annotated image URLs.
+- **INT8 CPU Serving Optimization:** Post-training dynamic INT8 quantization reduces model disk size from **10.82 MB down to 3.77 MB (2.87x compression)** and cuts 2-vCPU latency down to **~163 ms** while preserving high mask fidelity (0.988 cosine similarity, 0.847 Dice score).
+- **Redis Caching & Sliding-Window Rate Limiting:** High-throughput Redis integration providing 3600s TTL caching for agricultural knowledge base lookups, sliding-window rate limiting (30 requests/minute on prediction, 10 requests/minute on authentication), and immediate JWT token blacklisting on logout.
+- **Centralized MLOps with MLflow:** Experiment tracking server on port `5001` logging multi-architecture benchmarks (YOLO26-seg, RF_DETR, Mask R-CNN), hyperparameter sweeps, epoch-by-epoch loss/mAP curves, dataset repair audits (v001 to v002), and quantization metrics.
+- **Bilingual Agronomic Knowledge Base:** Comprehensive disease etiology, symptomology, agronomic treatments, and preventive practices in both **Vietnamese** and **English**, calibrated with diagnostic confidence notes.
+- **AgriLens Modern Frontend (Next.js 15):** Responsive interface featuring interactive toggle between original and segmented masks, Top-K probability distribution charts, close-margin alerts, collapsible navigation, and mobile camera support.
+- **Cloud-Native Deployment Ready:** Complete Docker Compose stack for local development and single-node AWS EC2 deployment, lightweight K3s Helm charts, automated database migrations via Alembic, and full Pytest/Vitest test suites.
 
 ## 3. Disease Taxonomy & Conditions
 
@@ -123,59 +137,87 @@ Prior to cross-architecture benchmarking, two fine-tuning configurations were ev
 - **Operational Simplicity**: The unified model requires only a single 11.0 MB ONNX graph in memory (50% RAM reduction vs. serving two 11.0 MB models) and completely eliminates upstream crop-classifier routing errors.
 
 ### 5.2. Comparative Architecture Benchmark on Held-Out Test Set ($N = 648$)
-
 | Architecture | Paradigm | Mask mAP@50 | Mask mAP@50:95 | Box mAP@50 | mIoU | Dice | Background Clean Rate | CPU Latency ($1024^2$) | Checkpoint Size |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **YOLO26n-seg (Joint)** | Single-Stage CNN | **0.6169** | **0.6106** | **0.6169** | **0.6986** | **0.8155** | **80.29%** | **~205 ms** | **11.0 MB (ONNX)** |
+| **YOLO26n-seg (Joint FP32)** | Single-Stage CNN | **0.6169** | **0.6106** | **0.6169** | **0.6986** | **0.8155** | **80.29%** | **~202 ms (2 vCPU)** | **10.82 MB (ONNX)** |
+| **YOLO26n-seg (Joint INT8)** | Single-Stage CNN | **0.6085** | **0.6022** | **0.6110** | **0.8060** | **0.8467** | **80.29%** | **~163 ms (2 vCPU)** | **3.77 MB (ONNX)** |
 | **RF_DETR** | Query Transformer | — | — | — | — | — | — | — | — |
 | **Mask R-CNN** | Two-Stage CNN | — | — | — | — | — | — | — | — |
 
-*Note: Results for RF_DETR and Mask R-CNN will be incorporated upon completion of ongoing Kaggle training runs. For comprehensive methodology, granular class breakdowns, and serving specifications, see [`docs/MODEL_SELECTION_REPORT.md`](docs/MODEL_SELECTION_REPORT.md).*
+*Note: For complete quantization methodology, proto preservation rationale, and serving contracts, see [`docs/QUANTIZATION_REPORT.md`](docs/QUANTIZATION_REPORT.md). For detailed architecture selection trade-offs, see [`docs/MODEL_SELECTION_REPORT.md`](docs/MODEL_SELECTION_REPORT.md).*
+
 ---
+
 ## 6. Quick Start Guide
 
 ### Prerequisites
-- Python 3.12+
+- Python 3.12+ (managed with `uv`)
 - Node.js 20+ and npm
-- Docker and Docker Compose
+- Docker and Docker Compose (v2.20+)
 
-### 1. Start Infrastructure Services
-Start PostgreSQL, MinIO, and Redis in the background:
+### Option A: Complete Docker Compose Stack (Recommended)
+
 ```bash
-docker compose up -d postgres minio redis
+# 1. Clone repository and initialize environment variables
+cp .env.example .env
+
+# 2. Launch all services (Frontend, Backend, PostgreSQL, Redis, MinIO, MLflow)
+docker compose up -d --build
 ```
 
-### 2. Backend Setup
+#### Service Endpoints:
+| Service | URL | Default Credentials | Description |
+| :--- | :--- | :--- | :--- |
+| **AgriLens Web App** | `http://localhost:3000` | — | Next.js 15 UI with segmentation viewer |
+| **FastAPI Backend & Docs** | `http://localhost:8000/docs` | — | OpenAPI Swagger documentation |
+| **MLflow Tracking UI** | `http://localhost:5001` | — | Experiment runs, curves, and artifacts |
+| **MinIO Storage Console** | `http://localhost:9001` | `minioadmin` / `minioadmin` | S3 image bucket management |
+| **PostgreSQL Database** | `localhost:5433` | `admin` / `changeme` (db: `plant_disease`) | Relational data persistence |
+| **Redis Cache & Limiter** | `localhost:6379` | — | In-memory cache and rate limiting |
+
+### Option B: Local Development Workflow
+
 ```bash
-# Install backend dependencies
+# 1. Start persistence and tracking infrastructure
+docker compose up -d postgres redis minio mlflow
+
+# 2. Backend setup and migrations
 uv sync
-
-# Run database migrations
 uv run alembic -c backend/alembic.ini upgrade head
-
-# Start FastAPI development server
 uv run uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-Interactive OpenAPI documentation will be available at `http://localhost:8000/docs`.
 
-### 3. Frontend Setup
-```bash
+# 3. Frontend setup
 cd frontend
 npm install
 npm run dev
 ```
-Open `http://localhost:3000` in your browser.
+
+### 6.1. Logging Experiments & Benchmarks to MLflow
+
+Once the MLflow service is running (`http://localhost:5001`), populate experiment tracking records:
+
+```bash
+# Import Kaggle training runs, parameters, metrics, and PR curves
+uv run python scripts/import_experiments_to_mlflow.py --tracking-uri http://localhost:5001
+
+# Log dataset engineering audits (v001 -> v002) and INT8 quantization benchmarks
+uv run python scripts/log_mlflow_pipeline.py --tracking-uri http://localhost:5001
+```
+
+### 6.2. Production AWS EC2 Deployment
+
+For step-by-step guidance on provisioning an AWS EC2 instance (Ubuntu 24.04), configuring Security Groups, environment variables, Nginx reverse proxy, and Let's Encrypt SSL, refer to the [AWS EC2 Production Deployment Guide](docs/DEPLOYMENT_EC2.md).
 
 ---
 
-## 7. Testing & Verification
+## 7. Testing & Quality Verification
 
-Run the automated test suites:
+Run the automated test suites to ensure system integrity:
 
 ```bash
-# Python backend, crawler, and dataset validation tests
+# Python backend, rate limiting, caching, and inference tests
 uv run pytest tests/ -v
 
-# Frontend component and integration tests
+# Frontend component and UI integration tests
 cd frontend && npm test -- --run
 ```

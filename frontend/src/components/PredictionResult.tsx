@@ -24,16 +24,27 @@ export default function PredictionResult({ prediction }: PredictionResultProps) 
 
   // Primary and secondary display names based on current language
   const primaryName = lang === "vi" ? diseaseNameVi : diseaseNameEn;
-  const secondaryName = lang === "vi" ? diseaseNameEn : diseaseNameVi;
+  const secondaryName =
+    rawLabel === "Healthy"
+      ? t("healthyStatusNote")
+      : lang === "vi"
+      ? diseaseNameEn
+      : diseaseNameVi;
 
   const confidencePercent = Math.round(confidence * 100);
-  const confidenceNote = recommendation?.confidence_note;
+  const confidencePercentDetailed = (confidence * 100).toFixed(1);
+  const localizedConfidenceNote =
+    confidence < 0.6
+      ? t("confidenceLowNote", { conf: confidencePercentDetailed })
+      : t("confidenceGoodNote", { conf: confidencePercentDetailed });
 
   const cropDisplay =
     recommendation?.crop === "rice"
       ? t("cropRice")
       : recommendation?.crop === "coffee"
       ? t("cropCoffee")
+      : recommendation?.crop === "rice/coffee" || recommendation?.crop === "coffee/rice"
+      ? t("cropRiceCoffee")
       : recommendation?.crop;
 
   const severityDisplay =
@@ -104,11 +115,55 @@ export default function PredictionResult({ prediction }: PredictionResultProps) 
           </span>
         </div>
       </div>
+      {prediction.detections && prediction.detections.length > 0 && (
+        <div className="p-4 rounded-2xl border border-surface-border bg-background/50 dark:bg-black/20 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-display font-medium uppercase tracking-wider text-claude-muted flex items-center gap-1.5">
+              <span>🎯</span>
+              <span>{t("detectedLesions")}</span>
+            </span>
+            <span className="px-2.5 py-0.5 text-xs font-bold bg-claude-orange/10 text-claude-orange border border-claude-orange/20 rounded-full">
+              {prediction.detections.length}{" "}
+              {lang === "vi"
+                ? "vùng tổn thương"
+                : prediction.detections.length === 1
+                ? "lesion spot"
+                : "lesion spots"}
+            </span>
+          </div>
 
-      {confidenceNote && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+            {prediction.detections.map((det, idx) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-surface-raised/70 border border-surface-border/60 text-xs"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-2.5 h-2.5 rounded-full bg-claude-orange shrink-0 shadow-sm" />
+                  <span className="font-semibold text-foreground truncate">
+                    {getDiseaseDisplayName(det.label, lang)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {det.area_pct !== undefined && det.area_pct > 0 && (
+                    <span className="text-claude-muted font-medium">
+                      {det.area_pct.toFixed(1)}% {lang === "vi" ? "diện tích" : "area"}
+                    </span>
+                  )}
+                  <span className="font-bold text-claude-orange">
+                    {Math.round(det.confidence * 100)}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {localizedConfidenceNote && (
         <div className="p-4 bg-warning-50 dark:bg-warning-900/10 border border-warning-500/20 text-warning-800 dark:text-warning-400 rounded-2xl text-sm font-medium flex gap-3 items-start shadow-sm">
           <span className="text-xl">💡</span>
-          <span className="pt-0.5">{confidenceNote}</span>
+          <span className="pt-0.5">{localizedConfidenceNote}</span>
         </div>
       )}
     </div>

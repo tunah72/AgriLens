@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { DiseaseRecommendation } from "../lib/api";
 import { ChevronDown, ChevronUp, AlertCircle, BookOpen, ShieldCheck, HeartPulse, HelpCircle } from "lucide-react";
 import { useLanguage } from "../lib/i18n";
+import { getVietnameseDiseaseKnowledge } from "../lib/disease-knowledge-vi";
 
 interface RecommendationCardProps {
   recommendation?: DiseaseRecommendation | null;
@@ -76,6 +77,7 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
   }
 
   const {
+    label,
     name_vi,
     name_en,
     description,
@@ -87,8 +89,19 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
     sources = [],
   } = recommendation;
 
-  const primaryName = lang === "vi" ? (name_vi || name_en) : (name_en || name_vi);
-  const secondaryName = lang === "vi" ? name_en : name_vi;
+  const viKnowledge = label ? getVietnameseDiseaseKnowledge(label) : null;
+  const displayDescription = lang === "vi" ? (viKnowledge?.description || description) : description;
+  const displaySymptoms = lang === "vi" ? (viKnowledge?.symptoms || symptoms) : symptoms;
+  const displayCauses = lang === "vi" ? (viKnowledge?.causes || causes) : causes;
+  const displayTreatments = lang === "vi" ? (viKnowledge?.treatments || treatments) : treatments;
+  const displayPrevention = lang === "vi" ? (viKnowledge?.prevention || prevention) : prevention;
+  const displayAdvisory = lang === "vi" ? (viKnowledge?.advisory || advisory) : advisory;
+
+  const primaryName = lang === "vi" ? (viKnowledge?.name_vi || name_vi || name_en) : (name_en || name_vi);
+  const secondaryName =
+    label === "Healthy"
+      ? (lang === "vi" ? t("healthyStatusNote") : name_en)
+      : (lang === "vi" ? name_en : name_vi);
 
   return (
     <div className="w-full space-y-6">
@@ -105,18 +118,18 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
       </div>
 
       <div className="space-y-3">
-        {description && (
+        {displayDescription && (
           <AccordionSection
             title={t("detailedDescription")}
             isOpen={!!openSections.description}
             onToggle={() => toggleSection("description")}
             icon={BookOpen}
           >
-            <p className="leading-relaxed">{description}</p>
+            <p className="leading-relaxed">{displayDescription}</p>
           </AccordionSection>
         )}
 
-        {symptoms.length > 0 && (
+        {displaySymptoms.length > 0 && (
           <AccordionSection
             title={t("typicalSymptoms")}
             isOpen={!!openSections.symptoms}
@@ -124,14 +137,14 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
             icon={HelpCircle}
           >
             <ul className="list-disc pl-5 space-y-1.5">
-              {symptoms.map((item, idx) => (
+              {displaySymptoms.map((item, idx) => (
                 <li key={idx} className="leading-relaxed">{item}</li>
               ))}
             </ul>
           </AccordionSection>
         )}
 
-        {causes.length > 0 && (
+        {displayCauses.length > 0 && (
           <AccordionSection
             title={t("underlyingCauses")}
             isOpen={!!openSections.causes}
@@ -139,14 +152,14 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
             icon={AlertCircle}
           >
             <ul className="list-disc pl-5 space-y-1.5">
-              {causes.map((item, idx) => (
+              {displayCauses.map((item, idx) => (
                 <li key={idx} className="leading-relaxed">{item}</li>
               ))}
             </ul>
           </AccordionSection>
         )}
 
-        {treatments.length > 0 && (
+        {displayTreatments.length > 0 && (
           <AccordionSection
             title={t("treatmentsRemedies")}
             isOpen={!!openSections.treatments}
@@ -154,14 +167,14 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
             icon={HeartPulse}
           >
             <ul className="list-decimal pl-5 space-y-2 font-medium text-claude-text">
-              {treatments.map((item, idx) => (
+              {displayTreatments.map((item, idx) => (
                 <li key={idx} className="leading-relaxed">{item}</li>
               ))}
             </ul>
           </AccordionSection>
         )}
 
-        {prevention.length > 0 && (
+        {displayPrevention.length > 0 && (
           <AccordionSection
             title={t("preventionMeasures")}
             isOpen={!!openSections.prevention}
@@ -169,7 +182,7 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
             icon={ShieldCheck}
           >
             <ul className="list-disc pl-5 space-y-1.5">
-              {prevention.map((item, idx) => (
+              {displayPrevention.map((item, idx) => (
                 <li key={idx} className="leading-relaxed">{item}</li>
               ))}
             </ul>
@@ -177,10 +190,10 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
         )}
       </div>
 
-      {advisory && (
+      {displayAdvisory && (
         <div className="p-3.5 border-l-4 border-warning-500/50 bg-warning-50 dark:bg-warning-500/10 text-warning-700 dark:text-warning-400 rounded-r-xl text-xs leading-relaxed font-semibold">
           <span className="font-bold">{t("advisoryNote")} </span>
-          {advisory}
+          {displayAdvisory}
         </div>
       )}
 

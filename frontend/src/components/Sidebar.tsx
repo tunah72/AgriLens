@@ -129,41 +129,55 @@ export default function Sidebar({
         }`}
         aria-label="Sidebar navigation"
       >
-        <div className="flex h-16 items-center justify-between p-4">
+        <div className={`flex h-16 items-center border-b border-surface-border/50 ${isCollapsed ? "justify-center px-3" : "justify-between px-4"}`}>
           {!isCollapsed ? (
-            <div className="flex items-center gap-2">
-              <Leaf className="h-5 w-5 fill-claude-orange/10 text-claude-orange" aria-hidden="true" />
-              <span className="text-xl font-serif font-bold tracking-tight text-foreground">{t("brand")}</span>
-            </div>
+            <>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-claude-orange/10 text-claude-orange border border-claude-orange/20 shadow-xs">
+                  <Leaf className="h-5 w-5 fill-claude-orange/20" aria-hidden="true" />
+                </div>
+                <span className="text-xl font-serif font-bold tracking-tight text-foreground truncate">{t("brand")}</span>
+              </div>
+              <button
+                type="button"
+                onClick={toggleCollapsed}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-surface-border/60 bg-surface-raised/70 text-text-secondary transition-all hover:bg-surface-hover hover:text-claude-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange"
+                aria-label={t("collapseNav")}
+                title={t("collapseNav")}
+              >
+                <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </>
           ) : (
-            <Leaf className="mx-auto h-5 w-5 text-claude-orange" aria-hidden="true" />
+            <button
+              type="button"
+              onClick={toggleCollapsed}
+              className="group relative flex h-11 w-11 items-center justify-center rounded-xl border border-surface-border bg-surface-raised text-claude-orange shadow-xs transition-all hover:bg-surface-hover hover:border-claude-orange/40 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2 focus-visible:ring-offset-surface-sidebar"
+              aria-label={t("expandNav")}
+              title={t("expandNav")}
+            >
+              <Leaf className="h-5 w-5 text-claude-orange transition-all duration-200 group-hover:scale-0 group-hover:opacity-0" aria-hidden="true" />
+              <ChevronRight className="h-5 w-5 text-claude-orange absolute scale-0 opacity-0 transition-all duration-200 group-hover:scale-100 group-hover:opacity-100" aria-hidden="true" />
+            </button>
           )}
-          <button
-            type="button"
-            onClick={toggleCollapsed}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-interactive-active hover:text-claude-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2 focus-visible:ring-offset-surface-sidebar"
-            aria-label={isCollapsed ? t("expandNav") : t("collapseNav")}
-          >
-            {isCollapsed ? <ChevronRight className="h-4 w-4" aria-hidden="true" /> : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}
-          </button>
         </div>
 
-        <div className="mb-4 px-3">
+        <div className="my-3 px-3">
           <button
             type="button"
             onClick={onNewDiagnosis}
             disabled={isPredictionSubmitting}
-            className={`flex w-full min-h-11 items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface-raised px-3 py-2 text-sm font-medium shadow-sm transition-colors hover:bg-surface-hover hover:border-border-hover disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2 focus-visible:ring-offset-surface-sidebar ${
-              isCollapsed ? "rounded-full p-2" : ""
+            className={`flex w-full min-h-11 items-center justify-center rounded-xl border border-surface-border bg-surface-raised font-medium shadow-xs transition-all hover:bg-surface-hover hover:border-claude-orange/40 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange ${
+              isCollapsed ? "h-11 w-11 mx-auto p-0" : "px-3 py-2 gap-2 text-sm"
             } ${activeTab === "diagnosis" ? "border-claude-orange/60 ring-2 ring-claude-orange/20" : ""}`}
             title={t("newDiagnosis")}
           >
-            <Plus className="h-4 w-4 shrink-0 text-claude-orange" aria-hidden="true" />
+            <Plus className="h-5 w-5 shrink-0 text-claude-orange" aria-hidden="true" />
             {!isCollapsed && <span className="text-foreground">{t("newDiagnosis")}</span>}
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3" aria-label="Navigation items">
+        <nav className="flex-1 space-y-1.5 px-3" aria-label="Navigation items">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -174,14 +188,17 @@ export default function Sidebar({
                 type="button"
                 aria-pressed={isActive}
                 onClick={() => onTabChange(item.id)}
-                className={`flex min-h-11 w-full items-center gap-3 rounded-lg p-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2 focus-visible:ring-offset-surface-sidebar ${
+                className={`flex min-h-11 w-full items-center rounded-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange ${
+                  isCollapsed ? "h-11 w-11 mx-auto justify-center p-0" : "gap-3 px-3 py-2 text-left"
+                } ${
                   isActive
-                    ? "bg-interactive-active font-medium text-claude-text"
+                    ? "bg-interactive-active font-semibold text-claude-orange shadow-xs border border-claude-orange/20"
                     : "text-text-secondary hover:bg-interactive-hover hover:text-claude-text"
                 }`}
+                title={isCollapsed ? item.label : undefined}
                 aria-label={isCollapsed ? item.label : undefined}
               >
-                <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-claude-orange" : "text-text-secondary"}`} aria-hidden="true" />
+                <Icon className={`h-5 w-5 shrink-0 ${isActive ? "text-claude-orange" : "text-text-secondary"}`} aria-hidden="true" />
                 {!isCollapsed && <span className="text-sm font-medium leading-none">{item.label}</span>}
               </button>
             );
@@ -199,13 +216,13 @@ export default function Sidebar({
             <button
               type="button"
               onClick={onLoginClick}
-              className={`flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-surface-border bg-surface-raised px-3 py-2 text-xs font-semibold shadow-sm transition-colors hover:bg-surface-hover hover:border-border-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange focus-visible:ring-offset-2 focus-visible:ring-offset-surface-sidebar ${
-                isCollapsed ? "rounded-full p-2" : ""
+              className={`flex min-h-11 w-full items-center justify-center rounded-xl border border-surface-border bg-surface-raised shadow-xs transition-all hover:bg-surface-hover hover:border-claude-orange/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-claude-orange ${
+                isCollapsed ? "h-11 w-11 mx-auto p-0" : "gap-2 px-3 py-2 text-xs font-semibold"
               }`}
               title={t("signIn")}
               aria-label={isCollapsed ? t("signIn") : undefined}
             >
-              <LogIn className="h-4 w-4 shrink-0 text-claude-orange" aria-hidden="true" />
+              <LogIn className="h-5 w-5 shrink-0 text-claude-orange" aria-hidden="true" />
               {!isCollapsed && <span className="text-claude-text">{t("signIn")}</span>}
             </button>
           )}

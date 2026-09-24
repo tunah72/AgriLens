@@ -56,7 +56,7 @@ backend:
     - name: CLASS_NAMES_PATH
       value: "/models/class_names.json"
     - name: MODEL_INPUT_SIZE
-      value: "640"
+      value: "1024"
     - name: MODEL_VERSION
       value: "yolo26-seg-onnx"
     - name: SKIP_DB_INIT

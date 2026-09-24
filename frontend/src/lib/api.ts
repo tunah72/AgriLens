@@ -28,6 +28,16 @@ export type DiseaseRecommendation = {
   advisory?: string;
 };
 
+export type DetectionItem = {
+  label: string;
+  confidence: number;
+  box: [number, number, number, number];
+  class_id: number;
+  polygon?: [number, number][];
+  polygons?: [number, number][][];
+  area_pct?: number;
+};
+
 export type PredictionResponse = {
   prediction: string;
   confidence: number;
@@ -35,6 +45,8 @@ export type PredictionResponse = {
   recommendation?: DiseaseRecommendation;
   image_id?: string;
   image_url?: string;
+  annotated_image_url?: string;
+  detections?: DetectionItem[];
   prediction_id?: string;
   latency_ms?: number;
 };
@@ -71,6 +83,8 @@ export type HistoryItem = {
   top_k: TopKPrediction[];
   recommendation?: DiseaseRecommendation;
   image_url?: string;
+  annotated_image_url?: string;
+  detections?: DetectionItem[];
   created_at: string;
 };
 

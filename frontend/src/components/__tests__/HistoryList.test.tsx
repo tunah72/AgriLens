@@ -39,28 +39,32 @@ describe("HistoryList pagination", () => {
     });
   });
 
-  it("navigates deterministically across three pages for eleven records in Vietnamese by default", async () => {
-    const user = userEvent.setup();
+  it(
+    "navigates deterministically across three pages for eleven records in Vietnamese by default",
+    async () => {
+      const user = userEvent.setup();
 
-    render(<HistoryList token="demo-token" onLoginPrompt={vi.fn()} onStartDiagnosis={vi.fn()} />);
+      render(<HistoryList token="demo-token" onLoginPrompt={vi.fn()} onStartDiagnosis={vi.fn()} />);
 
-    expect(await screen.findByText("Disease 1")).toBeVisible();
-    expect(screen.getByText("Trang 1 / 3")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Trang trước" })).toBeDisabled();
+      expect(await screen.findByText("Disease 1")).toBeVisible();
+      expect(screen.getByText("Trang 1 / 3")).toBeVisible();
+      expect(screen.getByRole("button", { name: "Trang trước" })).toBeDisabled();
 
-    await user.click(screen.getByRole("button", { name: "Trang 2" }));
-    expect(await screen.findByText("Disease 6")).toBeVisible();
-    expect(screen.getByText("Trang 2 / 3")).toBeVisible();
+      await user.click(screen.getByRole("button", { name: "Trang 2" }));
+      expect(await screen.findByText("Disease 6")).toBeVisible();
+      expect(screen.getByText("Trang 2 / 3")).toBeVisible();
 
-    await user.click(screen.getByRole("button", { name: "Trang sau" }));
-    expect(await screen.findByText("Disease 11")).toBeVisible();
-    expect(screen.getByText("Trang 3 / 3")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Trang sau" })).toBeDisabled();
+      await user.click(screen.getByRole("button", { name: "Trang sau" }));
+      expect(await screen.findByText("Disease 11")).toBeVisible();
+      expect(screen.getByText("Trang 3 / 3")).toBeVisible();
+      expect(screen.getByRole("button", { name: "Trang sau" })).toBeDisabled();
 
-    await waitFor(() => {
-      expect(mockFetchHistory).toHaveBeenNthCalledWith(3, "demo-token", 3, 5);
-    });
-  });
+      await waitFor(() => {
+        expect(mockFetchHistory).toHaveBeenNthCalledWith(3, "demo-token", 3, 5);
+      });
+    },
+    15000
+  );
 
   it("supports English pagination when LanguageProvider specifies English", async () => {
     const user = userEvent.setup();

@@ -36,6 +36,10 @@ ADVISORY_TEXT = (
     "Recommendations are for reference based on the input image. Verify field conditions and consult local "
     "plant protection specialists before applying chemical treatments or large-scale interventions."
 )
+ADVISORY_TEXT_VI = (
+    "Khuyến nghị chỉ mang tính chất tham khảo dựa trên ảnh phân tích. Cần đối chiếu thực tế đồng ruộng và "
+    "tham vấn chuyên gia bảo vệ thực vật địa phương trước khi tiến hành xử lý hóa chất hoặc can thiệp trên diện rộng."
+)
 
 
 class KnowledgeBase:
@@ -70,7 +74,7 @@ class KnowledgeBase:
         self._validate_confidence(confidence)
         disease = self.get_disease_info(disease_label)
         confidence_note = self._confidence_note(confidence)
-
+        confidence_note_vi = self._confidence_note_vi(confidence)
         if disease is None:
             return {
                 "label": disease_label,
@@ -92,12 +96,15 @@ class KnowledgeBase:
                 "sources": [],
                 "confidence": confidence,
                 "confidence_note": confidence_note,
+                "confidence_note_vi": confidence_note_vi,
                 "advisory": ADVISORY_TEXT,
+                "advisory_vi": ADVISORY_TEXT_VI,
             }
-
         disease["confidence"] = confidence
         disease["confidence_note"] = confidence_note
+        disease["confidence_note_vi"] = confidence_note_vi
         disease["advisory"] = ADVISORY_TEXT
+        disease["advisory_vi"] = ADVISORY_TEXT_VI
         return disease
 
     @staticmethod
@@ -113,6 +120,13 @@ class KnowledgeBase:
             )
         return f"Diagnosis confidence: {confidence:.1%}."
 
+    @staticmethod
+    def _confidence_note_vi(confidence: float) -> str:
+        if confidence < 0.6:
+            return (
+                f"Độ tin cậy chưa cao ({confidence:.1%}). Khuyến nghị: Chụp lại ảnh lá rõ nét hơn hoặc đối chiếu trực tiếp trên đồng ruộng."
+            )
+        return f"Độ tin cậy chẩn đoán: {confidence:.1%}."
     @classmethod
     def _load_diseases(cls, db_path: str) -> dict[str, dict[str, Any]]:
         if not os.path.exists(db_path):

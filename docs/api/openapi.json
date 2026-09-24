@@ -12,7 +12,7 @@
           "knowledge"
         ],
         "summary": "List Knowledge",
-        "description": "List supported plant disease labels and compact metadata.",
+        "description": "List supported plant disease labels and compact metadata with Redis caching.",
         "operationId": "list_knowledge_api_v1_knowledge_get",
         "responses": {
           "200": {
@@ -34,7 +34,7 @@
           "knowledge"
         ],
         "summary": "Get Knowledge",
-        "description": "Get detailed agricultural disease recommendations for a disease label.",
+        "description": "Get detailed agricultural disease recommendations for a disease label with Redis caching.",
         "operationId": "get_knowledge_api_v1_knowledge__disease_label__get",
         "parameters": [
           {
@@ -168,6 +168,30 @@
                 "schema": {
                   "$ref": "#/components/schemas/UserResponse"
                 }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
@@ -348,7 +372,7 @@
     "/health": {
       "get": {
         "summary": "Health Check",
-        "description": "Health check endpoint.",
+        "description": "Health check endpoint reporting system and dependency status.",
         "operationId": "health_check_health_get",
         "responses": {
           "200": {
@@ -378,6 +402,78 @@
           "file"
         ],
         "title": "Body_predict_api_v1_predict_post"
+      },
+      "DetectionItem": {
+        "properties": {
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "box": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Box"
+          },
+          "class_id": {
+            "type": "integer",
+            "title": "Class Id"
+          },
+          "polygon": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "integer"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Polygon"
+          },
+          "polygons": {
+            "items": {
+              "items": {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Polygons"
+          },
+          "area_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Area Pct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "confidence",
+          "box",
+          "class_id"
+        ],
+        "title": "DetectionItem"
       },
       "DiseaseRecommendation": {
         "properties": {
@@ -422,12 +518,30 @@
             ],
             "title": "Description"
           },
+          "description_vi": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description Vi"
+          },
           "symptoms": {
             "items": {
               "type": "string"
             },
             "type": "array",
             "title": "Symptoms"
+          },
+          "symptoms_vi": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Symptoms Vi"
           },
           "causes": {
             "items": {
@@ -436,6 +550,13 @@
             "type": "array",
             "title": "Causes"
           },
+          "causes_vi": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Causes Vi"
+          },
           "treatments": {
             "items": {
               "type": "string"
@@ -443,12 +564,26 @@
             "type": "array",
             "title": "Treatments"
           },
+          "treatments_vi": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Treatments Vi"
+          },
           "prevention": {
             "items": {
               "type": "string"
             },
             "type": "array",
             "title": "Prevention"
+          },
+          "prevention_vi": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Prevention Vi"
           },
           "severity": {
             "anyOf": [
@@ -490,6 +625,17 @@
             ],
             "title": "Confidence Note"
           },
+          "confidence_note_vi": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence Note Vi"
+          },
           "advisory": {
             "anyOf": [
               {
@@ -500,6 +646,17 @@
               }
             ],
             "title": "Advisory"
+          },
+          "advisory_vi": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Advisory Vi"
           }
         },
         "type": "object",
@@ -567,6 +724,24 @@
               }
             ],
             "title": "Image Url"
+          },
+          "annotated_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annotated Image Url"
+          },
+          "detections": {
+            "items": {
+              "$ref": "#/components/schemas/DetectionItem"
+            },
+            "type": "array",
+            "title": "Detections"
           },
           "created_at": {
             "type": "string",
@@ -727,6 +902,24 @@
               }
             ],
             "title": "Image Url"
+          },
+          "annotated_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annotated Image Url"
+          },
+          "detections": {
+            "items": {
+              "$ref": "#/components/schemas/DetectionItem"
+            },
+            "type": "array",
+            "title": "Detections"
           },
           "prediction_id": {
             "anyOf": [

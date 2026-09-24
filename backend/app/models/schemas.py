@@ -26,20 +26,37 @@ class DiseaseRecommendation(BaseModel):
     name_vi: str
     name_en: str
     description: str | None = None
+    description_vi: str | None = None
     symptoms: list[str] = Field(default_factory=list)
+    symptoms_vi: list[str] = Field(default_factory=list)
     causes: list[str] = Field(default_factory=list)
+    causes_vi: list[str] = Field(default_factory=list)
     treatments: list[str] = Field(default_factory=list)
+    treatments_vi: list[str] = Field(default_factory=list)
     prevention: list[str] = Field(default_factory=list)
+    prevention_vi: list[str] = Field(default_factory=list)
     severity: str | None = None
     sources: list[KnowledgeSource] = Field(default_factory=list)
     confidence: float | None = None
     confidence_note: str | None = None
+    confidence_note_vi: str | None = None
     advisory: str | None = None
+    advisory_vi: str | None = None
 
 
 class KnowledgeListResponse(BaseModel):
     items: list[DiseaseRecommendation]
     total: int
+
+
+class DetectionItem(BaseModel):
+    label: str
+    confidence: float
+    box: list[float]
+    class_id: int
+    polygon: list[list[int]] | None = None
+    polygons: list[list[list[int]]] = Field(default_factory=list)
+    area_pct: float | None = None
 
 
 class PredictionResponse(BaseModel):
@@ -49,9 +66,10 @@ class PredictionResponse(BaseModel):
     recommendation: DiseaseRecommendation | None = None
     image_id: str | None = None
     image_url: str | None = None
+    annotated_image_url: str | None = None
+    detections: list[DetectionItem] = Field(default_factory=list)
     prediction_id: str | None = None
     latency_ms: float | None = None
-
 
 # --- User & Auth Schemas ---
 
@@ -93,6 +111,8 @@ class HistoryItem(BaseModel):
     top_k: list[TopKPrediction]
     recommendation: DiseaseRecommendation | None = None
     image_url: str | None = None
+    annotated_image_url: str | None = None
+    detections: list[DetectionItem] = Field(default_factory=list)
     created_at: datetime
 
 

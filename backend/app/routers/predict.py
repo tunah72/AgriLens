@@ -13,7 +13,7 @@ from backend.app.config import settings
 from backend.app.db import crud, get_session
 from backend.app.db.orm_models import User
 from backend.app.knowledge.knowledge_base import KnowledgeBase
-from backend.app.models.schemas import PredictionResponse, TopKPrediction
+from backend.app.models.schemas import DetectionItem, PredictionResponse, TopKPrediction
 from backend.app.security import get_optional_current_user
 from backend.app.services.inference import InferenceService, InvalidImageError
 from backend.app.services.limiter import RateLimiter
@@ -94,7 +94,14 @@ async def predict(
 
     started_at = time.perf_counter()
     try:
-        top_k = inference.predict(image_bytes, filename=file.filename, crop=crop, top_k=5)
+        if hasattr(inference, "predict_segmentation"):
+            top_k, detections, annotated_bytes = inference.predict_segmentation(
+                image_bytes, filename=file.filename, crop=crop, top_k=5
+            )
+        else:
+            top_k = inference.predict(image_bytes, filename=file.filename, crop=crop, top_k=5)
+            detections = []
+            annotated_bytes = None
     except InvalidImageError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -113,6 +120,8 @@ async def predict(
 
     storage = get_storage_service()
     object_key = None
+    annotated_object_key = None
+    annotated_image_url = None
     try:
         object_key = storage.upload_image(
             image_bytes,
@@ -120,6 +129,22 @@ async def predict(
             content_type=file.content_type or "image/jpeg",
         )
         image_url = storage.get_url(object_key)
+
+        if annotated_bytes:
+            annotated_filename = f"annotated_{file.filename or 'leaf.jpg'}"
+            annotated_object_key = storage.upload_image(
+                annotated_bytes,
+                filename=annotated_filename,
+                content_type="image/jpeg",
+            )
+            annotated_image_url = storage.get_url(annotated_object_key)
+
+        db_recommendation = dict(recommendation) if recommendation else {}
+        if annotated_object_key:
+            db_recommendation["annotated_object_key"] = annotated_object_key
+        if detections:
+            db_recommendation["detections"] = detections
+
         image = crud.create_image_record(
             session=session,
             object_key=object_key,
@@ -136,7 +161,7 @@ async def predict(
             predicted_label=prediction,
             confidence=confidence,
             top_k=top_k_payload,
-            recommendation=recommendation,
+            recommendation=db_recommendation or recommendation,
             model_version=settings.MODEL_VERSION,
             latency_ms=latency_ms,
             commit=False,
@@ -149,11 +174,15 @@ async def predict(
                 storage.delete_image(object_key)
             except Exception as storage_exc:
                 print(f"Warning: Failed to clean up orphaned image '{object_key}': {storage_exc}")
+        if annotated_object_key:
+            try:
+                storage.delete_image(annotated_object_key)
+            except Exception as storage_exc:
+                print(f"Warning: Failed to clean up orphaned annotated image '{annotated_object_key}': {storage_exc}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=f"Storage or database unavailable: {exc}",
         ) from exc
-
     try:
         session.refresh(image)
         session.refresh(prediction_record)
@@ -167,6 +196,8 @@ async def predict(
         recommendation=recommendation,
         image_id=str(image.id),
         image_url=image_url,
+        annotated_image_url=annotated_image_url,
+        detections=[DetectionItem(**d) for d in detections],
         prediction_id=str(prediction_record.id),
         latency_ms=latency_ms,
     )

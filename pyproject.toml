@@ -59,6 +59,7 @@ backend = [
     "minio>=7.2.0",
     "numpy>=2.0.0",
     "onnxruntime>=1.19.0",
+    "opencv-python>=4.13.0.92",
     "passlib[bcrypt]>=1.7.4",
     "pillow>=12.2.0",
     "psycopg2-binary>=2.9.9",

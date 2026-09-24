@@ -61,6 +61,13 @@ def list_history(
                 top_k=row.top_k,
                 recommendation=row.recommendation,
                 image_url=_build_image_url(storage, row.image.object_key if row.image else None),
+                annotated_image_url=_build_image_url(
+                    storage,
+                    row.recommendation.get("annotated_object_key") if isinstance(row.recommendation, dict) else None,
+                ),
+                detections=(
+                    row.recommendation.get("detections", []) if isinstance(row.recommendation, dict) else []
+                ),
                 created_at=row.created_at,
             )
             for row in rows

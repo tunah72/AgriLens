@@ -6,8 +6,9 @@
 # Endpoints:
 #   - Web App:       http://localhost:3000
 #   - API Docs:      http://localhost:8000/docs
+#   - MLflow UI:     http://localhost:5001
 #   - MinIO Console: http://localhost:9001  (user: minioadmin / minioadmin)
-
+#   - Redis:         localhost:6379
 services:
 
   # ─────────────────────────────────────────
@@ -49,7 +50,7 @@ services:
       SKIP_DB_INIT: "false"
       MODEL_PATH: /models/yolo26_quantized.onnx
       CLASS_NAMES_PATH: /models/class_names.json
-      MODEL_INPUT_SIZE: "640"
+      MODEL_INPUT_SIZE: "1024"
       MODEL_VERSION: yolo26-seg-onnx
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
       ACCESS_TOKEN_EXPIRE_MINUTES: "1440"
@@ -65,6 +66,9 @@ services:
       MINIO_BUCKET: plant-disease-images
       MINIO_SECURE: "false"
       MLFLOW_TRACKING_URI: http://mlflow:5000
+    volumes:
+      - ./artifacts/yolo26_seg_joint/yolo26n_seg_joint_int8.onnx:/models/yolo26_quantized.onnx:ro
+      - ./models/class_names.json:/models/class_names.json:ro
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
       interval: 15s
@@ -137,13 +141,15 @@ services:
   mlflow:
     image: ghcr.io/mlflow/mlflow:latest
     ports:
-      - "5000:5000"
+      - "5001:5000"
     command: >
       mlflow server
       --host 0.0.0.0
       --port 5000
       --backend-store-uri sqlite:////mlflow/mlflow.db
-      --default-artifact-root /mlflow/artifacts
+      --artifacts-destination /mlflow/artifacts
+      --serve-artifacts
+      --allowed-hosts "*"
     volumes:
       - mlflow_data:/mlflow
     restart: unless-stopped

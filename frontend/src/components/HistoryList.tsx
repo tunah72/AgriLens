@@ -152,6 +152,8 @@ export default function HistoryList({ token, onLoginPrompt, onStartDiagnosis }: 
               ? t("cropRice")
               : crop === "coffee"
               ? t("cropCoffee")
+              : crop === "rice/coffee" || crop === "coffee/rice"
+              ? t("cropRiceCoffee")
               : crop;
 
           return (

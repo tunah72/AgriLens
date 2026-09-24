@@ -5,6 +5,11 @@ ENV PYTHONUNBUFFERED=1
 ENV UV_PROJECT_ENVIRONMENT=/usr/local
 
 WORKDIR /app
+# Cài system dependencies cho OpenCV (cv2)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1 \
+    libglib2.0-0 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Cài uv
 COPY --from=ghcr.io/astral-sh/uv:0.11.0 /uv /uvx /bin/
@@ -17,7 +22,7 @@ RUN uv sync --frozen --only-group backend --no-install-project --compile-bytecod
 COPY backend ./backend
 COPY alembic.ini ./alembic.ini
 COPY models /models
-
+COPY artifacts/yolo26_seg_joint/yolo26n_seg_joint_int8.onnx /models/yolo26_quantized.onnx
 EXPOSE 8000
 
 # Chạy migration rồi mới khởi động server

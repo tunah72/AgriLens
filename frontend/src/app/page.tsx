@@ -21,7 +21,7 @@ import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "../components/an
 import { useLanguage } from "../lib/i18n";
 
 export default function Home() {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
   const auth = useAuth();
   const {
     selectedFile,
@@ -41,8 +41,14 @@ export default function Home() {
   const mainContentRef = React.useRef<HTMLElement | null>(null);
   
   const [theme, setTheme] = React.useState<"light" | "dark">("light");
+  const [viewAnnotated, setViewAnnotated] = useState(true);
   const selectedImageUrl = useObjectUrl(selectedFile);
 
+  React.useEffect(() => {
+    if (prediction?.annotated_image_url) {
+      setViewAnnotated(true);
+    }
+  }, [prediction]);
   React.useEffect(() => {
     const isDark = document.documentElement.classList.contains("dark") || 
                    localStorage.getItem("theme") === "dark";
@@ -155,26 +161,76 @@ export default function Home() {
                   </StaggerItem>
                 ) : (
                   <StaggerContainer className="w-full">
-                    <BentoGrid className="grid-cols-1 md:grid-cols-3 md:auto-rows-[auto]">
+                    <BentoGrid className="grid-cols-1 lg:grid-cols-12 md:auto-rows-[auto] gap-6 max-w-7xl mx-auto">
                       
-                      {/* Original Image Cell */}
-                      <StaggerItem className="col-span-1 md:col-span-1">
-                        <div className="glass-panel p-6 rounded-2xl h-full flex flex-col premium-shadow">
-                          <h3 className="text-sm font-display font-bold uppercase tracking-widest text-claude-muted mb-4">
-                            {t("uploadedImage")}
-                          </h3>
-                          {selectedFile && (
-                            <div className="relative rounded-xl overflow-hidden flex-1 min-h-[240px] bg-surface-raised border border-surface-border">
+                      {/* Original / Annotated Image Cell */}
+                      <StaggerItem className="col-span-1 lg:col-span-5">
+                        <div className="glass-panel p-6 sm:p-7 rounded-3xl h-full flex flex-col premium-shadow space-y-4">
+                          <div className="flex items-center justify-between gap-3 pb-3 border-b border-surface-border/50">
+                            <div className="min-w-0">
+                              <h3 className="text-xs font-display font-bold uppercase tracking-wider text-claude-orange/90 block">
+                                {prediction?.annotated_image_url && viewAnnotated
+                                  ? t("viewModeAnnotated")
+                                  : t("uploadedImage")}
+                              </h3>
+                              <p className="text-xs text-claude-muted mt-0.5 truncate">
+                                {prediction?.annotated_image_url && viewAnnotated
+                                  ? (lang === "vi" ? "Lớp phủ mặt nạ & khung định vị đốm bệnh" : "Mask overlay & bounding box")
+                                  : (lang === "vi" ? "Ảnh chụp mẫu lá ban đầu" : "Original captured specimen")}
+                              </p>
+                            </div>
+                            {prediction?.annotated_image_url && (
+                              <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-semibold bg-claude-orange/10 text-claude-orange border border-claude-orange/20 rounded-full shrink-0">
+                                YOLO26-seg
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Dedicated Segmented Control Bar (Zero collision, perfectly responsive) */}
+                          {prediction?.annotated_image_url && (
+                            <div className="grid grid-cols-2 p-1 bg-surface-raised border border-surface-border rounded-xl text-xs font-semibold shadow-xs gap-1">
+                              <button
+                                type="button"
+                                onClick={() => setViewAnnotated(false)}
+                                className={`py-2 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 ${
+                                  !viewAnnotated
+                                    ? "bg-surface font-bold text-foreground shadow-sm border border-surface-border"
+                                    : "text-claude-muted hover:text-foreground hover:bg-surface/50"
+                                }`}
+                              >
+                                <span>🍃</span>
+                                <span className="truncate">{t("viewModeOriginal")}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setViewAnnotated(true)}
+                                className={`py-2 px-3 rounded-lg transition-all text-center flex items-center justify-center gap-1.5 ${
+                                  viewAnnotated
+                                    ? "bg-claude-orange text-white font-bold shadow-sm"
+                                    : "text-claude-muted hover:text-foreground hover:bg-surface/50"
+                                }`}
+                              >
+                                <span>🎯</span>
+                                <span className="truncate">{t("viewModeAnnotated")}</span>
+                              </button>
+                            </div>
+                          )}
+                          {(selectedFile || prediction?.image_url) && (
+                            <div className="relative rounded-2xl overflow-hidden w-full aspect-square max-h-[520px] bg-zinc-950/5 dark:bg-black/30 border border-surface-border flex items-center justify-center p-2 group shadow-inner">
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
-                                src={selectedImageUrl ?? undefined}
-                                alt="Uploaded leaf image for diagnosis"
-                                className="w-full h-full object-cover absolute inset-0"
+                                src={
+                                  viewAnnotated && prediction?.annotated_image_url
+                                    ? prediction.annotated_image_url
+                                    : (selectedImageUrl || prediction?.image_url || undefined)
+                                }
+                                alt="Leaf image for diagnosis"
+                                className="w-full h-full object-contain rounded-xl transition-all duration-300 drop-shadow-sm"
                               />
                             </div>
                           )}
                           {!isSubmitting && (
-                            <div className="mt-4 pt-4 border-t border-surface-border">
+                            <div className="mt-2 pt-3 border-t border-surface-border/50">
                               <ImageUploader
                                 selectedFile={selectedFile}
                                 onFileSelect={handleFileSelect}
@@ -188,22 +244,22 @@ export default function Home() {
                       </StaggerItem>
 
                       {/* AI Result Cell */}
-                      <StaggerItem className="col-span-1 md:col-span-2 space-y-4">
+                      <StaggerItem className="col-span-1 lg:col-span-7 space-y-4">
                         {isSubmitting ? (
-                          <div className="glass-panel rounded-2xl p-12 flex flex-col items-center justify-center gap-4 h-full premium-shadow">
+                          <div className="glass-panel rounded-3xl p-12 flex flex-col items-center justify-center gap-4 h-full premium-shadow">
                             <LoadingSpinner />
                             <p className="text-lg font-display font-medium text-foreground">{t("analyzingImage")}</p>
                           </div>
                         ) : (
                           prediction && (
                             <div className="flex flex-col gap-4 h-full">
-                              <div className="glass-panel rounded-2xl p-6 premium-shadow">
+                              <div className="glass-panel rounded-3xl p-6 sm:p-7 premium-shadow">
                                 <h3 className="text-sm font-display font-bold uppercase tracking-widest text-claude-muted mb-4">
                                   {t("analysisResults")}
                                 </h3>
                                 <PredictionResult prediction={prediction} />
                               </div>
-                              <div className="glass-panel rounded-2xl p-6 premium-shadow">
+                              <div className="glass-panel rounded-3xl p-6 sm:p-7 premium-shadow">
                                 <h3 className="text-sm font-display font-bold uppercase tracking-widest text-claude-muted mb-4">
                                   {t("confidenceAlternatives")}
                                 </h3>
@@ -216,8 +272,8 @@ export default function Home() {
 
                       {/* Recommendation Cell spans full width */}
                       {!isSubmitting && prediction && (
-                        <StaggerItem className="col-span-1 md:col-span-3 mt-4">
-                          <div className="glass-panel rounded-2xl p-6 premium-shadow">
+                        <StaggerItem className="col-span-1 lg:col-span-12 mt-4">
+                          <div className="glass-panel rounded-3xl p-6 sm:p-8 premium-shadow">
                              <RecommendationCard recommendation={prediction.recommendation} />
                           </div>
                         </StaggerItem>

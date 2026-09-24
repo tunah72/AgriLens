@@ -7,7 +7,6 @@ import numpy as np
 
 from scripts.check_masks import check_coco_masks
 from src.coco import build_ann_df, build_image_df, load_coco
-from src.config import COFFEE_CLASSES, RICE_CLASSES
 from src.reproducibility import set_seed
 
 
@@ -145,14 +144,11 @@ def test_reproducibility_seed():
     assert np_val1 == np_val2
 
 
-def test_notebooks_shared_facades():
-    """Verify backward-compatible facades in notebooks/shared match src modules."""
-    from notebooks.shared.config import COFFEE_CLASSES as SHARED_COFFEE
-    from notebooks.shared.config import RICE_CLASSES as SHARED_RICE
-    from notebooks.shared.paths import find_project_root
-    from notebooks.shared.reproducibility import set_seed as shared_set_seed
+def test_src_paths_root_discovery():
+    """Verify that find_project_root and get_project_root discover the valid project root."""
+    from src.paths import find_project_root, get_project_root
 
-    assert SHARED_RICE == RICE_CLASSES
-    assert SHARED_COFFEE == COFFEE_CLASSES
-    assert callable(shared_set_seed)
-    assert find_project_root().exists()
+    root = find_project_root()
+    assert (root / "pyproject.toml").is_file()
+    assert (root / "src").is_dir()
+    assert get_project_root().exists()

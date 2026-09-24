@@ -1,0 +1,63 @@
+{
+  "model_name": "yolo26_quantized.onnx",
+  "input": {
+    "name": "images",
+    "shape": [
+      1,
+      3,
+      1024,
+      1024
+    ],
+    "preprocess": "letterbox to square, pad 114, RGB, /255"
+  },
+  "outputs": [
+    {
+      "name": "output0",
+      "shape": [1, 300, 38],
+      "description": "300 detected proposals: [x1, y1, x2, y2, conf, class_id, 32 mask coefficients]"
+    },
+    {
+      "name": "output1",
+      "shape": [1, 32, 256, 256],
+      "description": "32 prototype mask feature maps (preserved in FP32 for fidelity)"
+    }
+  ],
+  "classes": [
+    "LeafMiner",
+    "PowderyMildew",
+    "Rust",
+    "AlgalLeafSpot",
+    "BrownSpot",
+    "Hispa",
+    "LeafBlast"
+  ],
+  "conf": 0.5,
+  "iou_nms": 0.7,
+  "postprocess": "decode seg protos, NMS, then unletterbox to original resolution",
+  "image_level_labels": [
+    "Healthy"
+  ],
+  "target_domain": "joint",
+  "precision": "INT8",
+  "quantization_method": "dynamic_quantization",
+  "weight_type": "QUInt8",
+  "preserved_fp32_nodes": [
+    "/model.23/proto/feat_refine.0/conv/Conv",
+    "/model.23/proto/feat_refine.1/conv/Conv",
+    "/model.23/proto/feat_fuse/conv/Conv",
+    "/model.23/proto/cv1/conv/Conv",
+    "/model.23/proto/cv2/conv/Conv",
+    "/model.23/proto/cv3/conv/Conv"
+  ],
+  "stage": "production_quantized_inference_model",
+  "metrics": {
+    "size_mb": 3.77,
+    "compression_ratio": "2.87x",
+    "size_reduction_pct": 65.19,
+    "cpu_latency_mean_ms": 141.26,
+    "cpu_latency_1_vcpu_ms": 274.75,
+    "cpu_latency_2_vcpu_ms": 163.27,
+    "proto_cosine_similarity": 0.98784,
+    "instance_mask_dice": 0.8467
+  }
+}

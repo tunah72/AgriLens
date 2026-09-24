@@ -28,7 +28,11 @@ class Settings(BaseSettings):
 
     # Redis configuration
     REDIS_URL: str = "redis://redis:6379/0"
-
+    REDIS_ENABLED: bool = True
+    REDIS_SOCKET_TIMEOUT: float = 2.0
+    RATE_LIMIT_PREDICT_PER_MINUTE: int = 30
+    RATE_LIMIT_LOGIN_PER_MINUTE: int = 10
+    KNOWLEDGE_CACHE_TTL_SECONDS: int = 3600
     # MinIO configuration
     MINIO_ENDPOINT: str = "minio:9000"
     MINIO_ACCESS_KEY: str = "minioadmin"

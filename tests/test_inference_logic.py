@@ -149,3 +149,32 @@ def test_raw_probabilities_not_deflated_by_softmax(inference_service):
         assert abs(preds[0][1] - 0.95) < 1e-5
     finally:
         inference_service.coffee_session.run = original_run
+
+
+def test_real_quantized_model_inference():
+    """Verify real quantized ONNX model loads and runs inference without mocks."""
+    import io
+    from pathlib import Path
+
+    from PIL import Image
+
+    model_path = Path("models/yolo26_quantized.onnx")
+    class_names_path = Path("models/class_names.json")
+    if not model_path.exists() or not class_names_path.exists():
+        pytest.skip("Quantized model or class names file not found")
+
+    class_names = InferenceService.load_class_names(str(class_names_path))
+    service = InferenceService(str(model_path), class_names, input_size=1024)
+
+    # Create a test leaf image
+    img = Image.new("RGB", (256, 256), color=(34, 139, 34))
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG")
+    image_bytes = buf.getvalue()
+
+    preds = service.predict(image_bytes)
+    assert isinstance(preds, list)
+    assert len(preds) > 0
+    for label, conf in preds:
+        assert label in class_names
+        assert 0.0 <= conf <= 1.0

@@ -1,0 +1,109 @@
+{
+  "system_info": {
+    "platform": "macOS-26.6-arm64-arm-64bit",
+    "processor": "arm",
+    "cpu_count": 8,
+    "python_version": "3.12.13",
+    "onnxruntime_version": "1.30.0"
+  },
+  "model_footprint": {
+    "fp32_size_mb": 10.82,
+    "int8_size_mb": 3.77,
+    "compression_ratio": 2.87,
+    "size_reduction_pct": 65.19
+  },
+  "latency_and_throughput": {
+    "fp32": {
+      "num_runs": 100,
+      "warmup_runs": 10,
+      "load_time_ms": 64.46187500841916,
+      "model_memory_mb": 29.546875,
+      "peak_memory_mb": 195.65625,
+      "latency_mean_ms": 139.27,
+      "latency_std_ms": 28.53,
+      "latency_p50_ms": 129.57,
+      "latency_p90_ms": 174.41,
+      "latency_p95_ms": 193.33,
+      "latency_p99_ms": 248.79,
+      "latency_min_ms": 116.1,
+      "latency_max_ms": 306.04,
+      "throughput_fps": 7.18
+    },
+    "int8": {
+      "num_runs": 100,
+      "warmup_runs": 10,
+      "load_time_ms": 178.21899999398738,
+      "model_memory_mb": 9.53125,
+      "peak_memory_mb": 210.25,
+      "latency_mean_ms": 141.26,
+      "latency_std_ms": 19.33,
+      "latency_p50_ms": 132.51,
+      "latency_p90_ms": 171.34,
+      "latency_p95_ms": 183.02,
+      "latency_p99_ms": 198.93,
+      "latency_min_ms": 121.91,
+      "latency_max_ms": 199.88,
+      "throughput_fps": 7.08
+    },
+    "speedup_ratio": 0.99,
+    "latency_reduction_pct": -1.43,
+    "container_vcpu_scaling": {
+      "fp32": {
+        "1_vcpu": {
+          "threads": 1,
+          "latency_mean_ms": 378.0,
+          "latency_p50_ms": 366.94,
+          "latency_p95_ms": 423.36,
+          "throughput_fps": 2.65
+        },
+        "2_vcpu": {
+          "threads": 2,
+          "latency_mean_ms": 201.77,
+          "latency_p50_ms": 197.88,
+          "latency_p95_ms": 221.41,
+          "throughput_fps": 4.96
+        },
+        "4_vcpu": {
+          "threads": 4,
+          "latency_mean_ms": 136.36,
+          "latency_p50_ms": 132.63,
+          "latency_p95_ms": 159.14,
+          "throughput_fps": 7.33
+        }
+      },
+      "int8": {
+        "1_vcpu": {
+          "threads": 1,
+          "latency_mean_ms": 274.75,
+          "latency_p50_ms": 267.02,
+          "latency_p95_ms": 338.98,
+          "throughput_fps": 3.64
+        },
+        "2_vcpu": {
+          "threads": 2,
+          "latency_mean_ms": 163.27,
+          "latency_p50_ms": 160.81,
+          "latency_p95_ms": 175.08,
+          "throughput_fps": 6.12
+        },
+        "4_vcpu": {
+          "threads": 4,
+          "latency_mean_ms": 157.89,
+          "latency_p50_ms": 146.15,
+          "latency_p95_ms": 198.42,
+          "throughput_fps": 6.33
+        }
+      }
+    }
+  },
+  "fidelity_tradeoff": {
+    "num_evaluated_images": 24,
+    "proto_cosine_similarity_mean": 0.98784,
+    "proto_cosine_similarity_std": 0.004,
+    "proto_mse": 0.003184,
+    "instance_mask_dice": 0.8467,
+    "instance_mask_miou": 0.806,
+    "top1_confidence_mae": 0.0906,
+    "top1_class_agreement_rate": 75.0
+  }
+}

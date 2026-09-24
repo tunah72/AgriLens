@@ -13,9 +13,22 @@ from sqlmodel import Session
 from backend.app.config import settings
 from backend.app.db import crud, get_session
 from backend.app.db.orm_models import User
+from backend.app.services.cache import get_cache_service
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
+
+def is_token_blacklisted(token: str) -> bool:
+    """Check if token was revoked via logout."""
+    cache = get_cache_service()
+    return cache.get(f"jwt_blacklist:{token}") is not None
+
+
+def blacklist_token(token: str, expire_seconds: int | None = None) -> bool:
+    """Revoke a token by adding it to Redis blacklist with TTL."""
+    cache = get_cache_service()
+    ttl = expire_seconds if expire_seconds is not None else (settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60)
+    return cache.set(f"jwt_blacklist:{token}", "revoked", expire=ttl)
 
 def create_access_token(subject: str) -> str:
     expire = datetime.now(UTC) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -24,6 +37,12 @@ def create_access_token(subject: str) -> str:
 
 
 def _decode_subject(token: str) -> uuid.UUID:
+    if is_token_blacklisted(token):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has been revoked",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     credentials_error = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

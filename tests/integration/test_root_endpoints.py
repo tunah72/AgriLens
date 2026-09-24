@@ -17,3 +17,12 @@ def test_api_v1_welcome(client: TestClient) -> None:
     assert data["docs"] == "/docs"
     assert data["health"] == "/health"
     assert data["version"] == "0.1.0"
+
+
+def test_health_check_endpoint(client: TestClient) -> None:
+    response = client.get("/health")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "ok"
+    assert "services" in data
+    assert "redis" in data["services"]

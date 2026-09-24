@@ -62,6 +62,8 @@ def client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
     monkeypatch.setattr(predict_router, "get_inference_service", lambda: FakeInference())
     monkeypatch.setattr(predict_router, "get_storage_service", lambda: FakeStorage())
     monkeypatch.setattr(history_router, "get_storage_service", lambda: FakeStorage())
+    from backend.app.config import settings
+    monkeypatch.setattr(settings, "SKIP_DB_INIT", True)
     app.dependency_overrides[get_session] = override_session
     try:
         with TestClient(app) as test_client:

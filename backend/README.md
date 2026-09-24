@@ -8,12 +8,12 @@ FastAPI backend application providing leaf disease instance segmentation inferen
 
 The backend is built with FastAPI, SQLModel (SQLAlchemy 2.0), PostgreSQL, MinIO, and Redis:
 
-- **Authentication & RBAC (`backend/app/routers/auth.py`)**: User registration, login, and JWT bearer authentication.
-- **Inference Service (`backend/app/routers/predict.py`)**: Real-time foliar disease inference utilizing ONNX Runtime for YOLO26-seg models.
-- **Agricultural Knowledge Base (`backend/app/routers/knowledge.py`)**: Disease descriptions, symptoms, causes, remedies, prevention measures, and literature citations.
+- **Authentication & RBAC (`backend/app/routers/auth.py`)**: User registration, login, JWT bearer authentication, and Redis-backed token revocation / logout.
+- **Inference Service (`backend/app/routers/predict.py`)**: Real-time foliar disease inference utilizing ONNX Runtime for YOLO26-seg models, protected by Redis rate limiting.
+- **Agricultural Knowledge Base (`backend/app/routers/knowledge.py`)**: Disease descriptions, symptoms, causes, remedies, prevention measures, and literature citations with Redis caching.
 - **Audit & History (`backend/app/routers/history.py`)**: Secure pagination of diagnostic sessions and user-submitted leaf images.
 - **Object Storage (`backend/app/services/storage.py`)**: MinIO S3-compatible client for storing raw uploads and annotated image masks.
-
+- **Caching & Throttling (`backend/app/services/cache.py`, `backend/app/services/limiter.py`)**: Redis connection pooling with graceful fallback, atomic rate limiting, and JSON object caching.
 ---
 
 ## 2. Local Infrastructure Services

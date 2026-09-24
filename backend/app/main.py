@@ -90,5 +90,15 @@ async def api_v1_root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
-    return {"status": "ok"}
+    """Health check endpoint reporting system and dependency status."""
+    from backend.app.services.cache import get_cache_service
+
+    cache = get_cache_service()
+    redis_status = "healthy" if cache.is_connected() else "disconnected"
+
+    return {
+        "status": "ok",
+        "services": {
+            "redis": redis_status,
+        },
+    }

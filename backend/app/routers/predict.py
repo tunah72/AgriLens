@@ -16,14 +16,18 @@ from backend.app.knowledge.knowledge_base import KnowledgeBase
 from backend.app.models.schemas import PredictionResponse, TopKPrediction
 from backend.app.security import get_optional_current_user
 from backend.app.services.inference import InferenceService, InvalidImageError
+from backend.app.services.limiter import RateLimiter
 from backend.app.services.storage import StorageService
 
 router = APIRouter(tags=["prediction"])
 knowledge_base = KnowledgeBase()
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp"}
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
-
-
+predict_rate_limiter = RateLimiter(
+    times=settings.RATE_LIMIT_PREDICT_PER_MINUTE,
+    seconds=60,
+    key_prefix="predict",
+)
 @lru_cache
 def get_inference_service() -> InferenceService:
     class_names = InferenceService.load_class_names(settings.CLASS_NAMES_PATH)
@@ -75,6 +79,7 @@ async def predict(
     crop: Literal["rice", "coffee"] | None = Query(None, description="Optional crop filter: 'rice' or 'coffee'"),
     session: Session = Depends(get_session),
     current_user: User | None = Depends(get_optional_current_user),
+    _rate_limit: None = Depends(predict_rate_limiter),
 ):
     """Receive a leaf image, run ONNX inference, save metadata, and return top-k predictions."""
     image_bytes = await read_valid_image(file)

@@ -1,0 +1,72 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: agrilens-ingress
+  namespace: agrilens
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - agrilens-ai.duckdns.org
+        - api.agrilens-ai.duckdns.org
+        - mlflow.agrilens-ai.duckdns.org
+        - storage.agrilens-ai.duckdns.org
+      secretName: agrilens-tls-cert
+  rules:
+    # 1. Main Web App (Next.js) + Same-Origin API proxy
+    - host: agrilens-ai.duckdns.org
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 3000
+
+    # 2. Dedicated Backend API & Swagger Docs
+    - host: api.agrilens-ai.duckdns.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8000
+
+    # 3. Dedicated MLflow Tracking Server UI
+    - host: mlflow.agrilens-ai.duckdns.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mlflow
+                port:
+                  number: 5000
+
+    # 4. MinIO Storage Console
+    - host: storage.agrilens-ai.duckdns.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: minio
+                port:
+                  number: 9001

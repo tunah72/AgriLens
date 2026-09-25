@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mlflow
+  namespace: agrilens
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: mlflow
+  template:
+    metadata:
+      labels:
+        app: mlflow
+    spec:
+      containers:
+        - name: mlflow
+          image: ghcr.io/mlflow/mlflow:latest
+          command:
+            - sh
+            - -c
+            - "mlflow server --host 0.0.0.0 --port 5000 --workers 1 --backend-store-uri sqlite:////mlflow/mlflow.db --artifacts-destination /mlflow/artifacts --serve-artifacts --allowed-hosts '*' --cors-allowed-origins '*'"
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - name: data
+              mountPath: /mlflow
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+            limits:
+              cpu: 500m
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: mlflow-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlflow
+  namespace: agrilens
+spec:
+  ports:
+    - port: 5000
+      targetPort: 5000
+  selector:
+    app: mlflow

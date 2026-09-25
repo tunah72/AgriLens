@@ -1,0 +1,129 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: agrilens
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: agrilens-backend:v1
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - >
+              until python -c "import socket; s = socket.socket(); s.connect(('postgres', 5432)); s.close()"; do
+                echo "Waiting for postgres on port 5432...";
+                sleep 2;
+              done;
+              alembic upgrade head &&
+              uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --workers 1
+          ports:
+            - containerPort: 8000
+          env:
+            - name: APP_ENV
+              value: "production"
+            - name: SKIP_DB_INIT
+              value: "false"
+            - name: MODEL_PATH
+              value: "/models/yolo26_quantized.onnx"
+            - name: CLASS_NAMES_PATH
+              value: "/models/class_names.json"
+            - name: MODEL_INPUT_SIZE
+              value: "1024"
+            - name: MODEL_VERSION
+              value: "yolo26-seg-onnx"
+            - name: POSTGRES_HOST
+              value: "postgres"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: agrilens-secrets
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: agrilens-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: agrilens-secrets
+                  key: POSTGRES_PASSWORD
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: agrilens-secrets
+                  key: REDIS_URL
+            - name: MINIO_ENDPOINT
+              value: "minio:9000"
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: agrilens-secrets
+                  key: MINIO_ACCESS_KEY
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: agrilens-secrets
+                  key: MINIO_SECRET_KEY
+            - name: MINIO_BUCKET
+              value: "plant-disease-images"
+            - name: MINIO_SECURE
+              value: "false"
+            - name: MLFLOW_TRACKING_URI
+              value: "http://mlflow:5000"
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: agrilens-secrets
+                  key: SECRET_KEY
+            - name: ACCESS_TOKEN_EXPIRE_MINUTES
+              valueFrom:
+                secretKeyRef:
+                  name: agrilens-secrets
+                  key: ACCESS_TOKEN_EXPIRE_MINUTES
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1500m
+              memory: 1024Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: agrilens
+spec:
+  ports:
+    - port: 8000
+      targetPort: 8000
+  selector:
+    app: backend

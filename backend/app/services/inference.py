@@ -351,7 +351,7 @@ class InferenceService:
         image_bytes: bytes,
         filename: str | None = None,
         crop: str | None = None,
-        top_k: int = 5,
+        top_k: int = 3,
         conf_threshold: float = 0.25,
         iou_threshold: float = 0.5,
     ) -> tuple[list[tuple[str, float]], list[dict], bytes | None]:
@@ -431,7 +431,7 @@ class InferenceService:
         image_bytes: bytes,
         filename: str | None = None,
         crop: str | None = None,
-        top_k: int = 5,
+        top_k: int = 3,
     ) -> list[tuple[str, float]]:
         """Run inference and return top-k (label, confidence) pairs."""
         top_k_preds, _, _ = self.predict_segmentation(

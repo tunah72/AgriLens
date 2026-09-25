@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     MINIO_SECRET_KEY: str = "minioadmin"
     MINIO_BUCKET: str = "plant-disease-images"
     MINIO_SECURE: bool = False
+    PUBLIC_IMAGE_URL_PREFIX: str = "/api/v1/images"
 
     # MLflow tracking
     MLFLOW_TRACKING_URI: str = "http://mlflow:5000"

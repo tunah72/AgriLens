@@ -43,11 +43,29 @@ class StorageService:
         return object_key
 
     def get_url(self, object_key: str, expires_hours: int = 24) -> str:
+        """Generate public URL for client-side display via backend proxy."""
+        from backend.app.config import settings
+
+        prefix = getattr(settings, "PUBLIC_IMAGE_URL_PREFIX", "/api/v1/images").rstrip("/")
+        return f"{prefix}/{object_key}"
+
+    def get_presigned_url(self, object_key: str, expires_hours: int = 24) -> str:
         """Generate presigned URL for direct client-side downloads from MinIO."""
         return self.client.presigned_get_object(
             bucket_name=self.bucket, object_name=object_key, expires=timedelta(hours=expires_hours)
         )
 
+    def get_image(self, object_key: str) -> tuple[bytes, str]:
+        """Fetch image bytes and content type from MinIO."""
+        response = None
+        try:
+            response = self.client.get_object(self.bucket, object_key)
+            content_type = response.headers.get("content-type", "image/jpeg")
+            return response.read(), content_type
+        finally:
+            if response is not None:
+                response.close()
+                response.release_conn()
     def delete_image(self, object_key: str) -> None:
         """Delete image from MinIO (used for orphan cleanup on database failure)."""
         try:

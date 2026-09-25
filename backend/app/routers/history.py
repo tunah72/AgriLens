@@ -68,6 +68,21 @@ def list_history(
                 detections=(
                     row.recommendation.get("detections", []) if isinstance(row.recommendation, dict) else []
                 ),
+                is_valid_leaf=(
+                    row.recommendation.get("is_valid_leaf", True)
+                    if isinstance(row.recommendation, dict)
+                    else True
+                ),
+                domain_warning=(
+                    row.recommendation.get("domain_warning")
+                    if isinstance(row.recommendation, dict)
+                    else None
+                ),
+                domain_warning_en=(
+                    row.recommendation.get("domain_warning_en")
+                    if isinstance(row.recommendation, dict)
+                    else None
+                ),
                 created_at=row.created_at,
             )
             for row in rows

@@ -75,6 +75,40 @@ def _upload_file(content: bytes, content_type: str = "image/jpeg") -> FakeUpload
     return FakeUploadFile(content, content_type)
 
 
+class SharedFakeStorage:
+    def __init__(self, uploaded_dict=None):
+        self.uploaded_dict = uploaded_dict if uploaded_dict is not None else {}
+
+    def upload_image(self, image_bytes: bytes, filename: str, content_type: str):
+        self.uploaded_dict.update(
+            {
+                "image_bytes": image_bytes,
+                "filename": filename,
+                "content_type": content_type,
+            }
+        )
+        return "predictions/leaf.jpg"
+
+    def get_url(self, object_key: str):
+        return f"https://storage.local/{object_key}"
+
+    def delete_image(self, object_key: str):
+        pass
+
+
+class SharedFakeSession:
+    rolled_back = False
+    committed = False
+
+    def commit(self):
+        self.committed = True
+
+    def refresh(self, instance):
+        pass
+
+    def rollback(self):
+        self.rolled_back = True
+
 def test_predict_upload_validation_accepts_supported_image():
     image_bytes = asyncio.run(read_valid_image(_upload_file(b"image-bytes", "image/png")))
 
@@ -116,10 +150,10 @@ def test_predict_upload_runs_inference_storage_and_db(monkeypatch):
             image_bytes: bytes,
             filename: str | None = None,
             crop: str | None = None,
-            top_k: int = 5,
+            top_k: int = 3,
         ):
             assert image_bytes == b"image-bytes"
-            assert top_k == 5
+            assert top_k == 3
             return [("LeafBlast", 0.82), ("BrownSpot", 0.12)]
 
     class FakeStorage:
@@ -204,6 +238,57 @@ def test_predict_rejects_corrupted_image(monkeypatch):
     monkeypatch.setattr(predict_router, "get_inference_service", lambda: FakeInference())
 
     with pytest.raises(HTTPException) as exc_info:
-        asyncio.run(predict(_upload_file(b"invalid-image-bytes")))
+        asyncio.run(predict(_upload_file(b"invalid-image-bytes"), session=SharedFakeSession()))
     assert exc_info.value.status_code == 400
     assert "Invalid image file" in exc_info.value.detail
+
+def test_predict_flags_out_of_domain_document(monkeypatch):
+    import numpy as np
+    import cv2
+    # Create synthetic document image: white page with dark horizontal text lines
+    img = np.full((500, 500, 3), 245, dtype=np.uint8)
+    for y in range(50, 450, 25):
+        cv2.line(img, (50, y), (450, y), (20, 20, 20), 2)
+    _, buf = cv2.imencode(".png", img)
+    doc_bytes = buf.tobytes()
+
+    image_id = uuid4()
+    prediction_id = uuid4()
+    monkeypatch.setattr(predict_router, "get_storage_service", lambda: SharedFakeStorage())
+    monkeypatch.setattr(predict_router.crud, "create_image_record", lambda **kw: SimpleNamespace(id=image_id))
+    monkeypatch.setattr(predict_router.crud, "create_prediction_record", lambda **kw: SimpleNamespace(id=prediction_id))
+
+    response = asyncio.run(
+        predict(
+            _upload_file(doc_bytes, "image/png"),
+            session=SharedFakeSession(),
+        )
+    )
+    assert response.prediction == "InvalidLeaf"
+    assert response.confidence == 0.0
+
+def test_predict_flags_real_certificate_77_png(monkeypatch):
+    from pathlib import Path
+    path_77 = Path("/Users/tuananhduong/Personal/77.png")
+    if not path_77.exists():
+        pytest.skip("77.png does not exist")
+    doc_bytes = path_77.read_bytes()
+    image_id = uuid4()
+    prediction_id = uuid4()
+    monkeypatch.setattr(predict_router, "get_storage_service", lambda: SharedFakeStorage())
+    monkeypatch.setattr(predict_router.crud, "create_image_record", lambda **kw: SimpleNamespace(id=image_id))
+    monkeypatch.setattr(predict_router.crud, "create_prediction_record", lambda **kw: SimpleNamespace(id=prediction_id))
+
+    response = asyncio.run(
+        predict(
+            _upload_file(doc_bytes, "image/png"),
+            session=SharedFakeSession(),
+        )
+    )
+    assert response.is_valid_leaf is False
+    assert response.prediction == "InvalidLeaf"
+    assert response.confidence == 0.0
+    assert len(response.top_k) == 0
+    assert "tài liệu" in response.domain_warning or "văn bản" in response.domain_warning
+    assert len(response.top_k) == 0
+    assert response.domain_warning is not None

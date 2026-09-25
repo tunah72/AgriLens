@@ -70,7 +70,9 @@ class PredictionResponse(BaseModel):
     detections: list[DetectionItem] = Field(default_factory=list)
     prediction_id: str | None = None
     latency_ms: float | None = None
-
+    is_valid_leaf: bool = True
+    domain_warning: str | None = None
+    domain_warning_en: str | None = None
 # --- User & Auth Schemas ---
 
 
@@ -113,8 +115,10 @@ class HistoryItem(BaseModel):
     image_url: str | None = None
     annotated_image_url: str | None = None
     detections: list[DetectionItem] = Field(default_factory=list)
+    is_valid_leaf: bool = True
+    domain_warning: str | None = None
+    domain_warning_en: str | None = None
     created_at: datetime
-
 
 class HistoryResponse(BaseModel):
     items: list[HistoryItem]

@@ -60,3 +60,14 @@ def test_predict_rejects_invalid_crop_type(client: TestClient) -> None:
         params={"crop": "banana"},
     )
     assert response.status_code == 422
+
+
+def test_get_image_endpoint_serves_and_validates(client: TestClient) -> None:
+    response = client.get("/api/v1/images/leaf.png")
+    assert response.status_code == 200
+    assert response.content == SAMPLE_LEAF_PNG
+    assert response.headers["content-type"] == "image/png"
+    assert "public, max-age=86400" in response.headers["cache-control"]
+
+    traversal = client.get("/api/v1/images/../secret.txt")
+    assert traversal.status_code in (400, 404)

@@ -1,8 +1,49 @@
 # End-to-End Instance Segmentation System for Coffee and Rice Leaf Disease Diagnosis
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-agrilens--ai.duckdns.org-brightgreen?style=flat&logo=traefik)](https://agrilens-ai.duckdns.org)
+[![API Swagger](https://img.shields.io/badge/Swagger%20Docs-api.agrilens--ai.duckdns.org-009688?style=flat&logo=fastapi)](https://api.agrilens-ai.duckdns.org/docs)
+[![MLflow Dashboard](https://img.shields.io/badge/MLflow-Tracking%20Server-0194E2?style=flat&logo=mlflow)](https://mlflow.agrilens-ai.duckdns.org)
+[![K3s Kubernetes](https://img.shields.io/badge/Kubernetes-K3s%20on%20AWS%20EC2-326CE5?style=flat&logo=kubernetes)](k8s/README.md)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python)](https://www.python.org/)
+[![Next.js 15](https://img.shields.io/badge/Next.js-15-black?style=flat&logo=next.js)](https://nextjs.org/)
+
 An end-to-end Machine Learning system employing **Instance Segmentation** to diagnose foliar diseases and deliver actionable agronomic treatment recommendations for Vietnam's specialty agricultural crops (Rice and Coffee).
 
 The system encompasses the complete machine learning engineering lifecycle: automated web data collection, Vision-Language Model (VLM) pre-labeling with human-in-the-loop validation, Segment Anything Model (SAM 3) mask generation, multi-architecture deep learning benchmarking across three representative paradigms (**YOLO26-seg**, **RF_DETR**, and **Mask R-CNN**), Joint Multi-Domain fine-tuning, ONNX Runtime CPU serving with INT8 quantization, and cloud-native deployment on K3s/Kubernetes.
+
+---
+
+## 🌐 Live Production Deployment & Public Endpoints
+
+The complete AgriLens ecosystem is deployed on a **K3s (Kubernetes) cluster hosted on AWS EC2** with Traefik Ingress Controller and automated Let's Encrypt SSL/TLS certificates. Recruiters and technical evaluators can access and inspect each service live:
+
+| Service | Public Domain URL | Access | Purpose & Key Features |
+| :--- | :--- | :---: | :--- |
+| **AgriLens Web Application** | [**`agrilens-ai.duckdns.org`**](https://agrilens-ai.duckdns.org) | *Public* | **Next.js 15 Web UI**: Real-time foliar leaf diagnosis, interactive segmentation mask slider, lesion count & damage surface metrics, top-3 candidate confidence distribution, and bilingual agronomic advisory (VI/EN). |
+| **FastAPI REST API & Swagger** | [**`api.agrilens-ai.duckdns.org/docs`**](https://api.agrilens-ai.duckdns.org/docs) | *Public* | **Interactive Swagger UI**: Live API testbed, OpenAPI schema, ReDoc documentation at [`/redoc`](https://api.agrilens-ai.duckdns.org/redoc), and service health probes at [`/health`](https://api.agrilens-ai.duckdns.org/health). |
+| **MLflow Tracking Server** | [**`mlflow.agrilens-ai.duckdns.org`**](https://mlflow.agrilens-ai.duckdns.org) | *Public* | **MLOps Experiment Dashboard**: Multi-architecture benchmark runs (YOLO26-seg, RF_DETR, Mask R-CNN), training telemetry, PR curves, dataset audit logs, and INT8 quantization benchmarks. |
+| **MinIO S3 Storage Console** | [**`storage.agrilens-ai.duckdns.org`**](https://storage.agrilens-ai.duckdns.org) | *Admin* | **Object Storage Console**: Cloud-native S3 storage management for raw agricultural leaf uploads, annotated segmentation masks, and model weights. |
+
+> 💡 **Same-Origin API Routing:** In addition to the dedicated API subdomain, the backend is also routed via same-origin reverse proxy at [`https://agrilens-ai.duckdns.org/api`](https://agrilens-ai.duckdns.org/api) to eliminate CORS overhead for client web applications.
+
+### 🧪 Quick Evaluation Guide for Reviewers & Recruiters
+
+Reviewers can verify model accuracy, edge serving latency, and domain guard robustness in 3 quick ways:
+
+1. **Interactive Web Testing**:
+   - Navigate to [https://agrilens-ai.duckdns.org](https://agrilens-ai.duckdns.org).
+   - Drag & drop or upload any coffee or rice leaf image (sample test images are available in [`artifacts/yolo26_seg_joint/label_qa/`](artifacts/yolo26_seg_joint/label_qa/)).
+   - Toggle the segmentation overlay slider to inspect precise lesion contours, affected surface area percentage, and treatment suggestions.
+   - **Out-of-Distribution (OOD) Test:** Upload a non-leaf specimen (e.g. document, face, flower) to see the Domain Guard reject false positives with zero hallucination.
+2. **Direct API Inference (`curl` or Swagger UI)**:
+   ```bash
+   curl -X POST "https://api.agrilens-ai.duckdns.org/api/v1/predict" \
+     -H "accept: application/json" \
+     -F "file=@artifacts/yolo26_seg_joint/label_qa/coffee_coffee_0006450.jpg"
+   ```
+3. **MLOps & Experiment Verification**:
+   - Open [https://mlflow.agrilens-ai.duckdns.org](https://mlflow.agrilens-ai.duckdns.org) to inspect live experiment parameters, mAP metrics, Precision-Recall curves, and INT8 quantization comparison runs.
+
 ---
 
 ## 1. System Architecture
@@ -221,6 +262,15 @@ kubectl apply -f k8s/frontend.yaml
 kubectl apply -f k8s/cluster-issuer.yaml
 kubectl apply -f k8s/ingress.yaml
 ```
+
+#### Production Cluster Ingress Endpoints:
+| Service | Domain Endpoint | Target Workload | Description |
+| :--- | :--- | :--- | :--- |
+| **AgriLens Web UI** | `https://agrilens-ai.duckdns.org` | `frontend:3000` | Main diagnostic web application |
+| **Same-Origin API** | `https://agrilens-ai.duckdns.org/api` | `backend:8000` | Same-origin API routing (eliminates CORS) |
+| **Dedicated REST API** | `https://api.agrilens-ai.duckdns.org` | `backend:8000` | Standalone REST API & Swagger UI (`/docs`, `/redoc`) |
+| **MLflow Tracking UI** | `https://mlflow.agrilens-ai.duckdns.org` | `mlflow:5000` | Experiment tracking & model registry |
+| **MinIO S3 Console** | `https://storage.agrilens-ai.duckdns.org` | `minio:9001` | S3 object storage management console |
 
 For in-depth Kubernetes architecture details, persistent volume configurations, and custom domain setup, refer to [`k8s/README.md`](k8s/README.md).
 

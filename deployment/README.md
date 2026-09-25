@@ -6,22 +6,27 @@ This directory contains configuration templates, Kubernetes Helm charts, environ
 
 ## 1. Deployment Strategies
 
-AgriLens supports two primary deployment topologies:
+AgriLens supports three primary deployment topologies:
 
-### Topology A: Single-Node VM / AWS EC2 (Docker Compose) — *Recommended for Production Launch*
+### Topology A: Single-Node VM / AWS EC2 (Docker Compose) — *Recommended for Quick Launch*
 For deploying the complete full-stack platform (Next.js Frontend, FastAPI Backend, PostgreSQL 16, Redis 7, MinIO S3, and MLflow 2.16) on a single AWS EC2 virtual machine (`c6i.large` or `t3.large`):
 - Refer to the detailed runbook: **[`docs/DEPLOYMENT_EC2.md`](../docs/DEPLOYMENT_EC2.md)**
 - Stack definition: **[`docker-compose.yml`](../docker-compose.yml)**
 - Environment template: **[`deployment/.env.example`](.env.example)**
 
-### Topology B: Multi-Node Kubernetes / K3s (Helm Chart)
-For deploying on a lightweight Kubernetes cluster (K3s) with automated ingress routing, persistent volume claims, and cluster scaling:
+### Topology B: Production Kubernetes / K3s Native Manifests (`k8s/`) — *Recommended for Production*
+For enterprise cloud deployment using standard Kubernetes manifests on K3s with Traefik Ingress, automated Let's Encrypt SSL certificates, DuckDNS domain routing, and isolated `agrilens` namespace:
+- Manifest directory: **[`k8s/`](../k8s/)**
+- Deployment guide: **[`k8s/README.md`](../k8s/README.md)**
+- Ingress & Cert-Manager: **[`k8s/ingress.yaml`](../k8s/ingress.yaml)** & **[`k8s/cluster-issuer.yaml`](../k8s/cluster-issuer.yaml)**
+
+### Topology C: Multi-Node Kubernetes / K3s (Helm Chart)
+For deploying via Helm charts with templated values across multi-node environments:
 - Helm Chart definition: **[`deployment/helm/Chart.yaml`](helm/Chart.yaml)**
 - Configurable values: **[`deployment/helm/values.yaml`](helm/values.yaml)**
 - Storage verification script: **[`deployment/scripts/verify-storage.sh`](scripts/verify-storage.sh)**
 - K3s bootstrap script: **[`deployment/scripts/setup-k3s.sh`](scripts/setup-k3s.sh)**
 - Traefik ingress proxy: **[`deployment/traefik/traefik.yml`](traefik/traefik.yml)**
-
 ---
 
 ## 2. Infrastructure Services Summary

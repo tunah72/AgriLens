@@ -274,6 +274,47 @@
         }
       }
     },
+    "/api/v1/images/{object_key}": {
+      "get": {
+        "tags": [
+          "prediction"
+        ],
+        "summary": "Get Image File",
+        "description": "Retrieve and stream image file directly from storage.",
+        "operationId": "get_image_file_api_v1_images__object_key__get",
+        "parameters": [
+          {
+            "name": "object_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Object Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/history": {
       "get": {
         "tags": [
@@ -743,6 +784,33 @@
             "type": "array",
             "title": "Detections"
           },
+          "is_valid_leaf": {
+            "type": "boolean",
+            "title": "Is Valid Leaf",
+            "default": true
+          },
+          "domain_warning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Domain Warning"
+          },
+          "domain_warning_en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Domain Warning En"
+          },
           "created_at": {
             "type": "string",
             "format": "date-time",
@@ -942,6 +1010,33 @@
               }
             ],
             "title": "Latency Ms"
+          },
+          "is_valid_leaf": {
+            "type": "boolean",
+            "title": "Is Valid Leaf",
+            "default": true
+          },
+          "domain_warning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Domain Warning"
+          },
+          "domain_warning_en": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Domain Warning En"
           }
         },
         "type": "object",

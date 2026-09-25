@@ -24,15 +24,16 @@ flowchart TB
 
     subgraph BackendServices["Backend Application Tier (FastAPI)"]
         API["FastAPI Asynchronous REST Server"]
+        DomainGuard["Domain Guard (OOD Foliage & Document Filter)"]
         InferenceEngine["ONNX Runtime Engine (YOLO26-seg FP32 & INT8)"]
         SegRenderer["Mask Decoder, Contour & Bounding Box Renderer"]
+        ImageProxy["Internal Storage Proxy (/api/v1/images)"]
         KB["Expert Agricultural Knowledge Base (Bilingual)"]
         AuthSvc["JWT Authentication, RBAC & Token Revocation"]
         StorageSvc["MinIO Storage Client (Upload & Orphan Cleanup)"]
         CacheLimiter["Redis Cache & Sliding-Window Rate Limiter"]
         DBSvc["SQLModel / PostgreSQL ORM"]
     end
-
     subgraph DataTier["Storage & Persistence Tier"]
         PG[(PostgreSQL 16: Users, Images, Predictions)]
         MinIO[(MinIO Object Storage: Raw Leaf & Annotated Masks)]
@@ -54,9 +55,12 @@ flowchart TB
 
     UI --> Traefik
     Traefik --> API
-    API --> InferenceEngine
+    API --> DomainGuard
+    DomainGuard --> InferenceEngine
     InferenceEngine --> SegRenderer
     API --> SegRenderer
+    API --> ImageProxy
+    ImageProxy --> StorageSvc
     API --> KB
     API --> AuthSvc
     API --> StorageSvc
@@ -76,13 +80,14 @@ flowchart TB
 ## 2. Key Features
 
 - **Real-Time Foliar Instance Segmentation & Visualization:** Evaluates high-resolution leaf images at $1024 \times 1024$ native resolution using an optimized **YOLO26-seg (ONNX runtime)** model. Automatically renders lesion contours, bounding boxes, and transparent colored overlays, returning lesion counts, damage surface area percentages, and annotated image URLs.
+- **Domain Guard & Out-of-Distribution (OOD) Protection:** Incorporates computer vision heuristics (HSV saturation/hue and stroke density analysis) to identify out-of-domain uploads (e.g. certificates, scanned documents, human faces, or non-plant objects). Rejects spurious predictions early and displays localized advisory warnings without generating hallucinations.
+- **Zero-Exposure Storage Architecture (Image Proxy):** Serves uploaded and annotated segmentation imagery directly via `/api/v1/images/{object_key}` backend proxy, keeping MinIO S3 object storage completely private within internal cluster networks.
 - **INT8 CPU Serving Optimization:** Post-training dynamic INT8 quantization reduces model disk size from **10.82 MB down to 3.77 MB (2.87x compression)** and cuts 2-vCPU latency down to **~163 ms** while preserving high mask fidelity (0.988 cosine similarity, 0.847 Dice score).
 - **Redis Caching & Sliding-Window Rate Limiting:** High-throughput Redis integration providing 3600s TTL caching for agricultural knowledge base lookups, sliding-window rate limiting (30 requests/minute on prediction, 10 requests/minute on authentication), and immediate JWT token blacklisting on logout.
 - **Centralized MLOps with MLflow:** Experiment tracking server on port `5001` logging multi-architecture benchmarks (YOLO26-seg, RF_DETR, Mask R-CNN), hyperparameter sweeps, epoch-by-epoch loss/mAP curves, dataset repair audits (v001 to v002), and quantization metrics.
 - **Bilingual Agronomic Knowledge Base:** Comprehensive disease etiology, symptomology, agronomic treatments, and preventive practices in both **Vietnamese** and **English**, calibrated with diagnostic confidence notes.
-- **AgriLens Modern Frontend (Next.js 15):** Responsive interface featuring interactive toggle between original and segmented masks, Top-K probability distribution charts, close-margin alerts, collapsible navigation, and mobile camera support.
-- **Cloud-Native Deployment Ready:** Complete Docker Compose stack for local development and single-node AWS EC2 deployment, lightweight K3s Helm charts, automated database migrations via Alembic, and full Pytest/Vitest test suites.
-
+- **AgriLens Modern Frontend (Next.js 15):** Responsive interface featuring interactive toggle between original and segmented masks, Top-3 candidate distribution, close-margin alerts, OOD specimen warnings, collapsible navigation, and mobile camera support.
+- **Cloud-Native Deployment Ready:** Complete Docker Compose stack for single-node AWS EC2 deployment, production Kubernetes/K3s manifests (`k8s/`) with Traefik Ingress & Let's Encrypt SSL, Helm charts, automated Alembic migrations, and full Pytest/Vitest verification suites.
 ## 3. Disease Taxonomy & Conditions
 
 The system identifies 7 primary foliar diseases affecting Vietnamese agriculture alongside asymptomatic healthy foliage as a negative control:
@@ -191,6 +196,33 @@ cd frontend
 npm install
 npm run dev
 ```
+
+### Option C: Production Kubernetes / K3s Cluster (`k8s/`)
+
+For production deployments on AWS EC2 or bare-metal Kubernetes using K3s with Traefik Ingress and automated Let's Encrypt SSL:
+
+```bash
+# 1. Initialize namespace and secret definitions
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/secrets.yaml
+kubectl apply -f k8s/pvc.yaml
+
+# 2. Deploy persistence & MLOps infrastructure (Postgres, Redis, MinIO, MLflow)
+kubectl apply -f k8s/postgres.yaml
+kubectl apply -f k8s/redis.yaml
+kubectl apply -f k8s/minio.yaml
+kubectl apply -f k8s/mlflow.yaml
+
+# 3. Deploy AgriLens application tier (Backend & Frontend)
+kubectl apply -f k8s/backend.yaml
+kubectl apply -f k8s/frontend.yaml
+
+# 4. Configure Ingress routing & TLS Certificate Issuer (DuckDNS / Let's Encrypt)
+kubectl apply -f k8s/cluster-issuer.yaml
+kubectl apply -f k8s/ingress.yaml
+```
+
+For in-depth Kubernetes architecture details, persistent volume configurations, and custom domain setup, refer to [`k8s/README.md`](k8s/README.md).
 
 ### 6.1. Logging Experiments & Benchmarks to MLflow
 

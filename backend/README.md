@@ -9,23 +9,29 @@ FastAPI asynchronous backend application providing real-time leaf disease instan
 The backend is built with FastAPI, SQLModel (SQLAlchemy 2.0), PostgreSQL, MinIO, and Redis:
 
 - **Authentication & RBAC (`backend/app/routers/auth.py`)**: User registration, login, JWT bearer authentication, and Redis-backed token revocation on logout.
+- **Domain Guard Service (`backend/app/services/domain_guard.py`)**:
+  - Computer vision foliage sanity check and Out-of-Distribution (OOD) validation using HSV color thresholding, saturation profiles, and text stroke density.
+  - Detects scanned documents, invoices, certificates, and non-plant photography to prevent spurious model predictions.
+  - Emits `is_valid_leaf: false` alongside bilingual contextual warning messages (`domain_warning` / `domain_warning_en`).
 - **Inference & Segmentation Service (`backend/app/routers/predict.py`, `backend/app/services/inference.py`)**:
   - Real-time foliar disease inference utilizing ONNX Runtime for YOLO26-seg models (both FP32 baseline and INT8 quantized checkpoints at $1024 \times 1024$ resolution).
   - Matrix decoding of prototype masks ($[1, 32, 256, 256]$) and 32 mask coefficients into polygon contours.
   - Transparent overlay rendering using OpenCV (`cv2`) with disease-specific color maps.
-  - S3 upload to MinIO (`annotated_image_url`) with transactional cleanup for orphaned storage artifacts.
+  - Automatic memory management with `gc.collect()` following heavy inference sessions.
+  - S3 upload to MinIO with transactional cleanup for orphaned storage artifacts.
 - **Agricultural Knowledge Base (`backend/app/routers/knowledge.py`, `backend/app/knowledge/knowledge_base.py`)**:
   - Bilingual agronomic advisory (Vietnamese & English) covering etiology, symptoms, chemical/biological treatments, prevention, and confidence-calibrated guidance.
   - Cached in Redis with 3600-second TTL.
 - **Audit & History (`backend/app/routers/history.py`)**:
   - Secure, paginated retrieval of past diagnostic sessions.
-  - Preserves both original leaf images, annotated segmentation masks, and detected lesion polygon structures.
-- **Object Storage (`backend/app/services/storage.py`)**: MinIO S3-compatible client for persisting raw uploads and annotated image masks.
+  - Preserves both original leaf images, annotated segmentation masks, detected lesion polygon structures, and domain validity flags.
+- **Object Storage & Image Proxy (`backend/app/services/storage.py`, `backend/app/routers/predict.py`)**:
+  - MinIO S3-compatible client for persisting raw uploads and annotated image masks.
+  - Built-in image proxy (`GET /api/v1/images/{object_key:path}`) streaming images to web clients with Cache-Control headers, preventing exposure of internal S3 endpoints to the public Internet.
 - **Caching & Throttling (`backend/app/services/cache.py`, `backend/app/services/limiter.py`)**:
   - Redis connection pooling with graceful in-memory fallback.
   - Sliding-window atomic rate limiting (`30 req/min` for inference, `10 req/min` for auth) returning `429 Too Many Requests` with `Retry-After` headers.
   - Token blacklisting with automatic TTL expiration matching the JWT expiration.
-
 ---
 
 ## 2. Infrastructure Services
@@ -70,7 +76,7 @@ uv run alembic -c backend/alembic.ini revision --autogenerate -m "describe_chang
 ## 4. API Response Contracts
 
 ### `POST /api/v1/predict` (Foliar Disease Diagnosis)
-Returns top-K classification probabilities, expert agronomic advisory, and detected segmentation masks:
+Returns top-3 classification probabilities, expert agronomic advisory, detected segmentation masks, and foliage domain validity:
 
 ```json
 {
@@ -100,8 +106,11 @@ Returns top-K classification probabilities, expert agronomic advisory, and detec
   },
   "latency_ms": 164.5,
   "image_id": 142,
-  "image_url": "http://localhost:9000/plant-disease-images/user_1/leaf_142.jpg",
-  "annotated_image_url": "http://localhost:9000/plant-disease-images/user_1/annotated_leaf_142.jpg",
+  "image_url": "/api/v1/images/user_1/leaf_142.jpg",
+  "annotated_image_url": "/api/v1/images/user_1/annotated_leaf_142.jpg",
+  "is_valid_leaf": true,
+  "domain_warning": null,
+  "domain_warning_en": null,
   "detections": [
     {
       "label": "LeafBlast",
@@ -114,6 +123,31 @@ Returns top-K classification probabilities, expert agronomic advisory, and detec
   ]
 }
 ```
+
+#### Out-of-Distribution (Non-Leaf / Document Upload) Response:
+When a user uploads a certificate, paper document, or non-plant image:
+```json
+{
+  "predicted_label": "Healthy",
+  "confidence": 0.0,
+  "top_k": [],
+  "recommendation": null,
+  "latency_ms": 12.3,
+  "image_id": 143,
+  "image_url": "/api/v1/images/user_1/doc_143.jpg",
+  "annotated_image_url": null,
+  "is_valid_leaf": false,
+  "domain_warning": "Hình ảnh có đặc điểm của tài liệu, văn bản hoặc giấy tờ, không phải lá cây lúa hoặc cà phê.",
+  "domain_warning_en": "Image characteristics match a document, text, or paper sheet, not a rice or coffee leaf.",
+  "detections": []
+}
+```
+
+### `GET /api/v1/images/{object_key:path}` (Internal Storage Proxy)
+Proxies image assets stored in MinIO S3 directly to client web browsers:
+- Returns binary image stream with correct `Content-Type` header (`image/jpeg`, `image/png`, etc.).
+- Sets `Cache-Control: public, max-age=86400` for client-side caching.
+- Prevents directory traversal attacks via path canonicalization checks.
 
 ---
 
@@ -145,6 +179,7 @@ Returns top-K classification probabilities, expert agronomic advisory, and detec
 | `MINIO_BUCKET` | `plant-disease-images`| Bucket for storing uploaded and annotated imagery |
 | `MINIO_SECURE` | `false` | Set to true when terminating TLS directly on MinIO |
 | `MLFLOW_TRACKING_URI` | `http://mlflow:5000` | Centralized MLflow server tracking URI |
+| `PUBLIC_IMAGE_URL_PREFIX` | `/api/v1/images` | Public URL prefix returned for uploaded and annotated images |
 
 ---
 

@@ -24,13 +24,16 @@ Modern, accessible web user interface for foliar leaf disease instance segmentat
 
 4. **Trust Signals & Model Interpretability**:
    - Prominent confidence score presentation with animated progress indicators.
-   - Top-K probability distribution bars comparing alternative candidate classifications.
+   - Top-3 candidate distribution bars comparing alternative candidate classifications.
    - Automated close-margin alert badge when top-ranked predictions differ by less than 10%.
+   - **Domain Guard & Out-of-Distribution Warning Card**: Prominent amber alert banner rendered whenever the backend flags an uploaded image as non-leaf, document, or certificate (`is_valid_leaf: false`), gracefully suppressing irrelevant agronomic treatment cards.
 
-5. **Personal Diagnosis Audit History**:
+5. **Zero-Exposure Image Serving & Proxy Resolution**:
+   - Intelligent URL resolution via `resolveImageUrl()` utility that routes image fetching through the backend proxy (`/api/v1/images/...`) or relative paths, avoiding browser CORS blocks or direct MinIO S3 port exposures.
+
+6. **Personal Diagnosis Audit History**:
    - Secure user authentication with JWT bearer tokens.
    - Paginated historical cards preserving uploaded images, annotated masks, and agronomic recommendations.
-
 ---
 
 ## 2. Getting Started
@@ -43,10 +46,10 @@ cp .env.example .env.local
 
 Set `NEXT_PUBLIC_API_BASE_URL` to your backend endpoint:
 - **Local development**: `http://localhost:8000/api/v1`
-- **AWS EC2 deployment**: `http://<EC2_PUBLIC_IP>:8000/api/v1` (or `https://<YOUR_DOMAIN>/api/v1` if using Nginx/Traefik)
+- **Production with Reverse Proxy / Ingress (Recommended)**: `/api/v1` (Default in `frontend/Dockerfile` for seamless same-origin routing without CORS or hardcoded IPs).
+- **Standalone AWS EC2 deployment**: `http://<EC2_PUBLIC_IP>:8000/api/v1` or `https://<YOUR_DOMAIN>/api/v1`
 
-> **Important Deployment Note**: In Next.js, `NEXT_PUBLIC_*` environment variables are baked into client JavaScript bundles at **build time**. If deploying via Docker on EC2, supply `NEXT_PUBLIC_API_BASE_URL` as a Docker build argument or via `.env` before running `docker compose build`.
-
+> **Important Deployment Note**: In Next.js, `NEXT_PUBLIC_*` environment variables are baked into client JavaScript bundles at **build time**. Using the default relative path `/api/v1` allows the frontend container to run behind any domain or ingress controller (Nginx, Traefik, AWS ALB) without needing image rebuilds.
 ### 2. Install Dependencies
 ```bash
 npm install

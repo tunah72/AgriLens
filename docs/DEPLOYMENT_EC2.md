@@ -369,6 +369,20 @@ cat backup_20260924.sql | docker compose exec -T postgres psql -U agrilens_admin
 | :--- | :--- | :--- |
 | **Frontend displays "Network Error" or cannot connect to backend** | `NEXT_PUBLIC_API_BASE_URL` in `.env` is set to `localhost` or missing. | Update `NEXT_PUBLIC_API_BASE_URL=http://<EC2_PUBLIC_IP>:8000/api/v1` in `.env`, then rebuild frontend: `docker compose build --no-cache frontend && docker compose up -d frontend`. |
 | **Container build fails with OOM (Exit 137)** | Next.js compilation exhausts memory on small EC2 instances. | Ensure the 4GB swapfile is created and active (`swapon --show`). |
-| **Segmentation mask not displaying in UI** | MinIO URL is using container internal hostname `minio:9000` instead of public URL. | Configure `MINIO_ENDPOINT` or proxy MinIO requests through Nginx `/plant-disease-images/`. |
+| **Segmentation mask not displaying in UI** | MinIO URL is using container internal hostname `minio:9000` instead of public URL. | Resolved automatically by the backend image proxy `/api/v1/images/{object_key}` and frontend `resolveImageUrl()`. If custom prefixes are used, verify `PUBLIC_IMAGE_URL_PREFIX` in `.env`. |
 | **Rate limit 429 errors during testing** | Exceeded sliding window limit (30 requests/minute). | Wait 60 seconds or adjust `RATE_LIMIT_PREDICT_PER_MINUTE=100` in `.env` and restart backend. |
 | **MLflow UI not loading** | Port 5001 is blocked by AWS Security Group. | Add inbound rule for port 5001 in your AWS EC2 Security Group restricted to your IP address. |
+
+---
+
+## 9. Alternative EC2 Topology: Native Kubernetes (K3s)
+
+For enterprise teams requiring cloud-native orchestration, automated Let's Encrypt SSL renewal, and ingress routing via Traefik and DuckDNS on AWS EC2, AgriLens provides pre-configured Kubernetes manifests:
+
+```bash
+# Deploy complete AgriLens stack on K3s running on EC2
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/
+```
+
+See the full guide at [`k8s/README.md`](../k8s/README.md).

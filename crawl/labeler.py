@@ -130,13 +130,12 @@ class DatasetLabeler:
             self.labels_list = COFFEE_LABELS
             self.label_vn = COFFEE_LABEL_VN
             self.badge_color = COFFEE_BADGE_COLOR
-            self.title = "☕ Coffee Disease Labeler"
+            self.title = "Coffee Disease Labeler"
         else:
             self.labels_list = RICE_LABELS
             self.label_vn = RICE_LABEL_VN
             self.badge_color = RICE_BADGE_COLOR
-            self.title = "🌾 Rice Disease Labeler"
-        self._init_state()
+            self.title = "Rice Disease Labeler"
 
     def _init_state(self):
         """Load the dataset into session state once."""
@@ -385,9 +384,8 @@ class DatasetLabeler:
         seen_hashes = {}  # hash -> first_index
         duplicates_found = 0
 
-        progress_text = "🔍 Scanning for duplicates..."
+        progress_text = "Scanning for duplicates..."
         progress_bar = st.progress(0, text=progress_text)
-
         for i, rec in enumerate(self.records):
             img_path = Path(rec["data"]["image"])
             if not img_path.exists():
@@ -485,7 +483,7 @@ class DatasetLabeler:
         self._render_sidebar()
         self._inject_keyboard_nav()
 
-        tab_label, tab_gallery = st.tabs(["🏷️ Labeler", "🖼️ Gallery"])
+        tab_label, tab_gallery = st.tabs(["Labeler", "Gallery"])
         with tab_label:
             self._render_main()
         with tab_gallery:
@@ -527,15 +525,14 @@ class DatasetLabeler:
             export_data = self.export_results(include_unlabeled=include_unlabeled)
             export_str = json.dumps(export_data, indent=2, ensure_ascii=False)
             st.download_button(
-                "📥 Export labels (.json)",
+                "Export labels (.json)",
                 data=export_str,
                 file_name="labeled_output.json",
                 mime="application/json",
             )
-
             # ZIP export — JSON + images subfolder
             valid_count = len(export_data)
-            zip_label = f"📦 Export dataset (.zip)  [{valid_count} images]"
+            zip_label = f"Export dataset (.zip)  [{valid_count} images]"
             st.download_button(
                 zip_label,
                 data=self.export_zip(include_unlabeled=include_unlabeled),
@@ -543,7 +540,7 @@ class DatasetLabeler:
                 mime="application/zip",
             )
 
-            uploaded = st.file_uploader("📤 Import labels (.json, .jsonl)", type=["json", "jsonl"])
+            uploaded = st.file_uploader("Import labels (.json, .jsonl)", type=["json", "jsonl"])
             if uploaded is not None:
                 count = self.import_results(uploaded.read().decode("utf-8"))
                 st.success(f"Imported {count} labels.")
@@ -552,7 +549,7 @@ class DatasetLabeler:
             st.divider()
             st.subheader("Tools")
             if st.button(
-                "🔍 Detect Duplicates", width="stretch", help="Mark bit-for-bit identical images as 'Invalid'"
+                "Detect Duplicates", width="stretch", help="Mark bit-for-bit identical images as 'Invalid'"
             ):
                 dups = self._detect_duplicates()
                 if dups > 0:
@@ -563,7 +560,7 @@ class DatasetLabeler:
 
     def _render_main(self):
         if not self.records:
-            st.warning("⚠️ No image records found in the dataset.")
+            st.warning("No image records found in the dataset.")
             st.info(
                 f"Dataset path: `{self._input_path}`\n\n"
                 f"To generate crawled data, run:\n"
@@ -590,7 +587,7 @@ class DatasetLabeler:
             )
         with col_next:
             st.button(
-                "Next ➡",
+                "Next ->",
                 width="stretch",
                 on_click=self._go_next,
                 disabled=(idx == len(self.records) - 1),
@@ -615,7 +612,7 @@ class DatasetLabeler:
 
             if ai_pred:
                 vn_pred = self.label_vn.get(ai_pred, "")
-                st.info(f"🤖 AI prediction: **{ai_pred}** ({vn_pred})")
+                st.info(f"AI prediction: **{ai_pred}** ({vn_pred})")
 
             # Highlight human label (green) and AI prediction (blue)
             human_col = (
@@ -646,7 +643,7 @@ class DatasetLabeler:
             st.caption(f"**Source:** {data.get('source_url', 'N/A')}")
             context = data.get("context", "")
             if context:
-                with st.expander("📝 Context text", expanded=False):
+                with st.expander("Context text", expanded=False):
                     st.write(context[:1000])
 
     def _render_image_editor(self, idx: int):
@@ -656,7 +653,7 @@ class DatasetLabeler:
         original_path = Path(data.get("image_original") or data.get("image", ""))
         has_edits = bool(data.get("image_original"))  # original_path stored → edits were saved at least once
 
-        with st.expander("✏️ Edit Image", expanded=False):
+        with st.expander("Edit Image", expanded=False):
             # Controls
             rotate = st.slider(
                 "Rotate (°)",
@@ -699,7 +696,7 @@ class DatasetLabeler:
             # Action buttons
             btn_save, btn_revert = st.columns(2)
             with btn_save:
-                if st.button("💾 Save edits", key=f"edit_save_{idx}", width="stretch"):
+                if st.button("Save edits", key=f"edit_save_{idx}", width="stretch"):
                     saved = self._save_edited_image(idx)
                     if saved:
                         st.success(f"Saved → `{saved.name}`")
@@ -721,7 +718,7 @@ class DatasetLabeler:
 
             if has_edits:
                 edited_name = Path(data["image"]).name
-                st.caption(f"✅ Active edit: `{edited_name}`")
+                st.caption(f"Active edit: `{edited_name}`")
 
     def _inject_keyboard_nav(self):
         """Inject JavaScript to listen for keyboard shortcuts and update query-params."""
@@ -783,7 +780,7 @@ class DatasetLabeler:
 
     def _render_gallery(self):
         """Show all images in a grid with their current label."""
-        st.markdown("### 🖼️ Image Gallery")
+        st.markdown("### Image Gallery")
         if not self.records:
             st.info("No images available in the gallery.")
             return
@@ -863,7 +860,7 @@ class DatasetLabeler:
 
                     # Jump to this image button
                     if st.button(
-                        f"✏️ Label #{idx + 1}",
+                        f"Label #{idx + 1}",
                         key=f"gallery_jump_{idx}",
                         width="stretch",
                     ):

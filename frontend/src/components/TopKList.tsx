@@ -4,6 +4,7 @@ import React from "react";
 import { TopKPrediction } from "../lib/api";
 import { getDiseaseDisplayName } from "../lib/disease-labels";
 import { useLanguage } from "../lib/i18n";
+import { AlertTriangle } from "lucide-react";
 
 interface TopKListProps {
   topK: TopKPrediction[];
@@ -65,8 +66,9 @@ export default function TopKList({ topK }: TopKListProps) {
 
       {hasClosePrediction && (
         <div className="p-3.5 bg-warning-50 dark:bg-warning-500/10 border border-warning-100/50 dark:border-warning-500/20 text-warning-700 dark:text-warning-300 rounded-lg text-xs space-y-1.5 animate-in fade-in duration-200">
-          <p className="font-bold flex items-center gap-1">
-            ⚠️ {t("closeMarginWarningTitle")}
+          <p className="font-bold flex items-center gap-1.5">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+            <span>{t("closeMarginWarningTitle")}</span>
           </p>
           <p className="leading-relaxed font-medium">
             {t("closeMarginWarningDesc")}

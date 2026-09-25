@@ -5,6 +5,7 @@ import { PredictionResponse } from "../lib/api";
 import { motion } from "framer-motion";
 import { getDiseaseDisplayName } from "../lib/disease-labels";
 import { useLanguage } from "../lib/i18n";
+import { AlertTriangle, Lightbulb, Target } from "lucide-react";
 
 interface PredictionResultProps {
   prediction: PredictionResponse;
@@ -81,7 +82,7 @@ export default function PredictionResult({ prediction }: PredictionResultProps) 
 
         <div className="p-5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-2xl text-sm space-y-3 shadow-sm">
           <div className="flex items-center gap-2 font-bold text-base text-amber-700 dark:text-amber-300">
-            <span>⚠️</span>
+            <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{lang === "vi" ? "Hướng dẫn chụp ảnh chuẩn xác" : "Image Capture Guidelines"}</span>
           </div>
           <ul className="list-disc list-inside space-y-2 text-xs sm:text-sm text-foreground/90 leading-relaxed">
@@ -159,7 +160,7 @@ export default function PredictionResult({ prediction }: PredictionResultProps) 
         <div className="p-4 rounded-2xl border border-surface-border bg-background/50 dark:bg-black/20 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-display font-medium uppercase tracking-wider text-claude-muted flex items-center gap-1.5">
-              <span>🎯</span>
+              <Target className="w-3.5 h-3.5 shrink-0" />
               <span>{t("detectedLesions")}</span>
             </span>
             <span className="px-2.5 py-0.5 text-xs font-bold bg-claude-orange/10 text-claude-orange border border-claude-orange/20 rounded-full">
@@ -202,7 +203,7 @@ export default function PredictionResult({ prediction }: PredictionResultProps) 
 
       {localizedConfidenceNote && (
         <div className="p-4 bg-warning-50 dark:bg-warning-900/10 border border-warning-500/20 text-warning-800 dark:text-warning-400 rounded-2xl text-sm font-medium flex gap-3 items-start shadow-sm">
-          <span className="text-xl">💡</span>
+          <Lightbulb className="w-5 h-5 shrink-0 text-amber-500 mt-0.5" />
           <span className="pt-0.5">{localizedConfidenceNote}</span>
         </div>
       )}

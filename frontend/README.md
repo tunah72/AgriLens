@@ -8,7 +8,7 @@ Modern, accessible web user interface for foliar leaf disease instance segmentat
 
 1. **Interactive Foliar Instance Segmentation Visualizer**:
    - **Mask / Original Image Toggle**: Seamlessly switch between the raw photograph and the YOLO26-seg color-coded segmentation mask with bounding box overlays.
-   - **Damage Metrics**: Real-time display of detected lesion counts (🎯) and lesion surface area percentage (📐) over total leaf area.
+   - **Damage Metrics**: Real-time display of detected lesion counts and lesion surface area percentage over total leaf area.
    - **Lesion Polygon Cards**: Clear breakdown of localized infection sites and individual confidence scores.
 
 2. **Bilingual Agronomic Advisory (Tiếng Việt & English)**:

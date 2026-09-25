@@ -14,9 +14,9 @@ echo "=================================================="
 echo -e "\n1. Verifying PersistentVolumeClaims (PVCs) Status:"
 kubectl -n "$NAMESPACE" get pvc
 if kubectl -n "$NAMESPACE" get pvc | grep -q "Pending"; then
-    echo "❌ WARNING: One or more PVCs are in Pending state!"
+    echo "[WARNING] One or more PVCs are in Pending state!"
 else
-    echo "✅ All PVCs are successfully Bound."
+    echo "[OK] All PVCs are successfully Bound."
 fi
 
 echo -e "\n2. Verifying Probes and Pod Health:"
@@ -26,9 +26,9 @@ kubectl -n "$NAMESPACE" get pods -l 'app in (postgres, minio, redis)'
 echo -e "\n3. Verifying PostgreSQL (Liveness & Backup):"
 PG_POD=$(kubectl -n "$NAMESPACE" get pod -l app=postgres -o jsonpath="{.items[0].metadata.name}")
 if kubectl -n "$NAMESPACE" exec "$PG_POD" -- pg_isready -U admin -d plant_disease; then
-    echo "✅ PostgreSQL is ready (pg_isready: OK)"
+    echo "[OK] PostgreSQL is ready (pg_isready: OK)"
 else
-    echo "❌ PostgreSQL is NOT ready!"
+    echo "[ERROR] PostgreSQL is NOT ready!"
 fi
 
 echo "Checking Backup CronJob:"
@@ -37,17 +37,17 @@ kubectl -n "$NAMESPACE" get cronjob
 echo -e "\n4. Verifying MinIO (Liveness):"
 MINIO_POD=$(kubectl -n "$NAMESPACE" get pod -l app=minio -o jsonpath="{.items[0].metadata.name}")
 if kubectl -n "$NAMESPACE" exec "$MINIO_POD" -- curl -sf http://localhost:9000/minio/health/live >/dev/null; then
-    echo "✅ MinIO is ready (Liveness: OK)"
+    echo "[OK] MinIO is ready (Liveness: OK)"
 else
-    echo "❌ MinIO is NOT ready!"
+    echo "[ERROR] MinIO is NOT ready!"
 fi
 
 echo -e "\n5. Verifying Redis (Liveness):"
 REDIS_POD=$(kubectl -n "$NAMESPACE" get pod -l app=redis -o jsonpath="{.items[0].metadata.name}")
 if kubectl -n "$NAMESPACE" exec "$REDIS_POD" -- redis-cli ping | grep -q "PONG"; then
-    echo "✅ Redis is ready (PING: PONG)"
+    echo "[OK] Redis is ready (PING: PONG)"
 else
-    echo "❌ Redis is NOT ready!"
+    echo "[ERROR] Redis is NOT ready!"
 fi
 
 echo -e "\n=================================================="

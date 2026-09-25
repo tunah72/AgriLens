@@ -20,7 +20,7 @@ import { BentoGrid } from "../components/layout/BentoGrid";
 import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "../components/animations/Animations";
 import { useLanguage } from "../lib/i18n";
 import { resolveImageUrl } from "../lib/utils";
-
+import { Leaf, Target } from "lucide-react";
 export default function Home() {
   const { lang, t } = useLanguage();
   const auth = useAuth();
@@ -199,7 +199,7 @@ export default function Home() {
                                     : "text-claude-muted hover:text-foreground hover:bg-surface/50"
                                 }`}
                               >
-                                <span>🍃</span>
+                                <Leaf className="w-3.5 h-3.5 shrink-0" />
                                 <span className="truncate">{t("viewModeOriginal")}</span>
                               </button>
                               <button
@@ -211,7 +211,7 @@ export default function Home() {
                                     : "text-claude-muted hover:text-foreground hover:bg-surface/50"
                                 }`}
                               >
-                                <span>🎯</span>
+                                <Target className="w-3.5 h-3.5 shrink-0" />
                                 <span className="truncate">{t("viewModeAnnotated")}</span>
                               </button>
                             </div>

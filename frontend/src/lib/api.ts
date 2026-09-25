@@ -22,7 +22,7 @@ export type DiseaseRecommendation = {
   treatments: string[];
   prevention: string[];
   severity?: string;
-  sources: KnowledgeSource[];
+  sources?: KnowledgeSource[];
   confidence?: number;
   confidence_note?: string;
   advisory?: string;
@@ -49,6 +49,9 @@ export type PredictionResponse = {
   detections?: DetectionItem[];
   prediction_id?: string;
   latency_ms?: number;
+  is_valid_leaf?: boolean;
+  domain_warning?: string;
+  domain_warning_en?: string;
 };
 
 export type UserCreate = {
@@ -85,6 +88,9 @@ export type HistoryItem = {
   image_url?: string;
   annotated_image_url?: string;
   detections?: DetectionItem[];
+  is_valid_leaf?: boolean;
+  domain_warning?: string;
+  domain_warning_en?: string;
   created_at: string;
 };
 
@@ -181,10 +187,13 @@ function createApiError(status: number, payload: unknown, defaultMessage: string
   }
 
   if (status === 400 || status === 422) {
+    const customMessage = payload && typeof payload === "object" && "detail" in payload && typeof payload.detail === "string"
+      ? payload.detail
+      : "Invalid input. Please check the required fields.";
     return new ApiError({
       status,
       code: "VALIDATION_ERROR",
-      message: "Invalid input. Please check the required fields.",
+      message: customMessage,
       fieldErrors: getValidationFieldErrors(payload),
     });
   }

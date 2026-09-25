@@ -7,6 +7,7 @@ export const DISEASE_LABELS_VI: Record<string, string> = {
   PowderyMildew: "Bệnh phấn trắng hại cà phê",
   Rust: "Bệnh rỉ sắt hại cà phê",
   AlgalLeafSpot: "Bệnh đốm rong hại cà phê",
+  InvalidLeaf: "Không phải lá cây hợp lệ",
 };
 
 export const DISEASE_LABELS_EN: Record<string, string> = {
@@ -18,6 +19,7 @@ export const DISEASE_LABELS_EN: Record<string, string> = {
   PowderyMildew: "Powdery Mildew",
   Rust: "Rust",
   AlgalLeafSpot: "Algal Leaf Spot",
+  InvalidLeaf: "Invalid Leaf Specimen",
 };
 
 export function getDiseaseDisplayName(label: string, lang: "vi" | "en" = "vi"): string {

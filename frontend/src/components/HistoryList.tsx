@@ -10,6 +10,7 @@ import Pagination from "./ui/Pagination";
 import RecommendationCard from "./RecommendationCard";
 import { useLanguage } from "../lib/i18n";
 import { DISEASE_LABELS_VI, DISEASE_LABELS_EN } from "../lib/disease-labels";
+import { resolveImageUrl } from "../lib/utils";
 
 interface HistoryListProps {
   token: string | null;
@@ -172,7 +173,7 @@ export default function HistoryList({ token, onLoginPrompt, onStartDiagnosis }: 
                   {item.image_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={item.image_url}
+                      src={resolveImageUrl(item.image_url)}
                       alt="Leaf image from diagnosis history"
                       className="h-12 w-12 shrink-0 rounded-lg border border-surface-border bg-surface-raised object-cover"
                     />

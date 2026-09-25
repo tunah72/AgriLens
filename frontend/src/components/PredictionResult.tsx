@@ -54,6 +54,46 @@ export default function PredictionResult({ prediction }: PredictionResultProps) 
       ? t("severityMedium")
       : t("severityLow");
 
+  if (prediction.is_valid_leaf === false || rawLabel === "InvalidLeaf") {
+    const defaultWarningVi =
+      "Hình ảnh có đặc điểm của tài liệu, văn bản hoặc giấy tờ, không phải lá cây lúa hoặc cà phê.";
+    const defaultWarningEn =
+      "Image characteristics match a document, text, or paper sheet, not a rice or coffee leaf.";
+
+    const warningText =
+      lang === "vi"
+        ? (prediction.domain_warning || defaultWarningVi)
+        : (prediction.domain_warning_en || defaultWarningEn);
+
+    return (
+      <div className="w-full space-y-6">
+        <div className="flex flex-col gap-2 border-b border-warning-500/20 pb-5">
+          <span className="text-xs font-display font-bold uppercase tracking-[0.2em] text-warning-500 font-semibold">
+            {lang === "vi" ? "Ngoài phạm vi chẩn đoán (Out-of-Domain)" : "Out of Domain"}
+          </span>
+          <h3 className="text-2xl sm:text-3xl font-display font-bold text-foreground leading-tight mt-1">
+            {lang === "vi" ? "Không phải phiến lá hợp lệ" : "Invalid Leaf Specimen"}
+          </h3>
+          <p className="text-sm font-sans text-claude-muted mt-1 leading-relaxed">
+            {warningText}
+          </p>
+        </div>
+
+        <div className="p-5 bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 rounded-2xl text-sm space-y-3 shadow-sm">
+          <div className="flex items-center gap-2 font-bold text-base text-amber-700 dark:text-amber-300">
+            <span>⚠️</span>
+            <span>{lang === "vi" ? "Hướng dẫn chụp ảnh chuẩn xác" : "Image Capture Guidelines"}</span>
+          </div>
+          <ul className="list-disc list-inside space-y-2 text-xs sm:text-sm text-foreground/90 leading-relaxed">
+            <li>{lang === "vi" ? "Chụp cận cảnh phiến lá lúa hoặc lá cà phê còn tươi trên cây." : "Capture a clear close-up of a fresh rice or coffee leaf."}</li>
+            <li>{lang === "vi" ? "Tránh chụp văn bản, bằng khen, hóa đơn, màn hình, hoa quả hoặc vật thể lạ." : "Avoid capturing documents, certificates, screens, flowers, or arbitrary objects."}</li>
+            <li>{lang === "vi" ? "Đảm bảo đủ ánh sáng tự nhiên và lấy nét rõ vào bề mặt phiến lá." : "Ensure natural lighting and sharp focus on the leaf surface."}</li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-6">
       <div className="flex flex-col gap-2 border-b border-surface-border/50 pb-5">

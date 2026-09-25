@@ -19,6 +19,7 @@ import { useObjectUrl } from "../hooks/useObjectUrl";
 import { BentoGrid } from "../components/layout/BentoGrid";
 import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "../components/animations/Animations";
 import { useLanguage } from "../lib/i18n";
+import { resolveImageUrl } from "../lib/utils";
 
 export default function Home() {
   const { lang, t } = useLanguage();
@@ -221,8 +222,8 @@ export default function Home() {
                               <img
                                 src={
                                   viewAnnotated && prediction?.annotated_image_url
-                                    ? prediction.annotated_image_url
-                                    : (selectedImageUrl || prediction?.image_url || undefined)
+                                    ? resolveImageUrl(prediction.annotated_image_url)
+                                    : (selectedImageUrl || resolveImageUrl(prediction?.image_url) || undefined)
                                 }
                                 alt="Leaf image for diagnosis"
                                 className="w-full h-full object-contain rounded-xl transition-all duration-300 drop-shadow-sm"
@@ -236,7 +237,13 @@ export default function Home() {
                                 onFileSelect={handleFileSelect}
                                 isSubmitting={isSubmitting}
                                 onSubmit={handlePredictSubmit}
-                                error={error}
+                                error={
+                                  error
+                                    ? (lang === "vi" && (error.includes("The server encountered an error") || error.includes("server error"))
+                                        ? "Máy chủ gặp sự cố khi xử lý ảnh. Vui lòng kiểm tra lại ảnh chụp lá hoặc thử lại sau."
+                                        : error)
+                                    : null
+                                }
                               />
                             </div>
                           )}
@@ -259,19 +266,21 @@ export default function Home() {
                                 </h3>
                                 <PredictionResult prediction={prediction} />
                               </div>
-                              <div className="glass-panel rounded-3xl p-6 sm:p-7 premium-shadow">
-                                <h3 className="text-sm font-display font-bold uppercase tracking-widest text-claude-muted mb-4">
-                                  {t("confidenceAlternatives")}
-                                </h3>
-                                <TopKList topK={prediction.top_k} />
-                              </div>
+                              {prediction.is_valid_leaf !== false && prediction.top_k && prediction.top_k.length > 0 && (
+                                <div className="glass-panel rounded-3xl p-6 sm:p-7 premium-shadow">
+                                  <h3 className="text-sm font-display font-bold uppercase tracking-widest text-claude-muted mb-4">
+                                    {t("confidenceAlternatives")}
+                                  </h3>
+                                  <TopKList topK={prediction.top_k} />
+                                </div>
+                              )}
                             </div>
                           )
                         )}
                       </StaggerItem>
 
                       {/* Recommendation Cell spans full width */}
-                      {!isSubmitting && prediction && (
+                      {!isSubmitting && prediction && prediction.is_valid_leaf !== false && prediction.recommendation && prediction.recommendation.crop !== "none" && (
                         <StaggerItem className="col-span-1 lg:col-span-12 mt-4">
                           <div className="glass-panel rounded-3xl p-6 sm:p-8 premium-shadow">
                              <RecommendationCard recommendation={prediction.recommendation} />

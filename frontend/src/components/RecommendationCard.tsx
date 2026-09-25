@@ -60,7 +60,10 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
     }));
   };
 
-  if (!recommendation) {
+  if (!recommendation || recommendation.label === "InvalidLeaf" || recommendation.crop === "none") {
+    if (recommendation?.label === "InvalidLeaf" || recommendation?.crop === "none") {
+      return null;
+    }
     return (
       <div className="w-full p-8 text-center py-12 space-y-4">
         <div className="mx-auto w-12 h-12 rounded-full bg-surface-sidebar flex items-center justify-center text-claude-muted">

@@ -31,7 +31,7 @@ export default function TopKList({ topK }: TopKListProps) {
       </div>
 
       <div className="space-y-3.5">
-        {topK.map((item, index) => {
+        {topK.slice(0, 3).map((item, index) => {
           const percentage = Math.round(item.confidence * 100);
           const barWidthPercent = Math.max(
             5,
